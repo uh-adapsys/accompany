@@ -8,6 +8,7 @@
 QSqlDatabase db;
 bool dbOpen;
 int experimentLocation;
+QString experimentLocationString;
 QString sessionUser;
 QString languageId;
 int deleteCandidate;
@@ -143,6 +144,7 @@ void MainWindow::setup()
     if (query.next())
     {
        experimentLocation = query.value(0).toInt();
+       experimentLocationString = query.value(0).toString();
        sessionUser = query.value(1).toString();
     }
     else
@@ -283,14 +285,14 @@ void MainWindow::on_APCreatePushButton_clicked()
           sId = query.value(0).toInt() + 1;
     }
 
-    query.prepare("INSERT INTO ActionPossibilities VALUES (:apId, :apText, 1, null, :apPhrase, null, 0,:pred,100,100)");
+    query.prepare("INSERT INTO ActionPossibilities VALUES (:apId, :apText, 1, :locn, :apPhrase, null, 0,:pred,100,100)");
 
 
     query.bindValue(":apId",sId);
     query.bindValue(":apText",ui->APTextComboBox->currentText().section("::",1,1));
     query.bindValue(":apPhrase",ui->APPhraseComboBox->currentText().section("::",1,1));
     query.bindValue(":pred",ui->APPredComboBox->currentText().section("::",1,1));
-
+    query.bindValue(":locn",experimentLocationString);
 
   //  qDebug() << sId;
   //  qDebug() << ui->APTextComboBox->currentText().section("::",1,1);
