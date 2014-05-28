@@ -1,0 +1,16 @@
+<div class="container-fluid">
+  <div class="row-fluid">
+	<div class="span2">
+		<p> Sessions: {{episodes.Episodes.length}}</p>
+	</div>
+	<div class="span10">
+			<ul class="Episodes" ng-repeat="ev in episodes.Episodes">
+				<li ng-repeat="events in ev.Events" class="thumbnail">
+					<!--a href="#/events/{{events.imageUrl}}" class="thumb"><img ng-src="{{events.imageUrl}}"></a CANT LOAD ALL IMAGES-->
+					<p>Event: {{events.name}} at {{events.time['real']}}  in {{events.location}}</p>
+					<a href="{{events.imageUrl}}">Robot Snapshot</a>
+				</li>
+			</ul>
+	</div>
+  </div>	
+</div>

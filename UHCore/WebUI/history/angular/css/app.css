@@ -1,0 +1,43 @@
+body {
+  padding-top: 20px;
+}
+
+.episodes {
+  list-style: none;
+}
+
+.thumb {
+  float: left;
+  margin: -1em 1em 1.5em 0em;
+  padding-bottom: 1em;
+  height: 100px;
+  width: 100px;
+}
+
+.episodes li {
+  clear: both;
+  height: 100px;
+  padding-top: 15px;
+}
+
+
+
+.inner {
+    outline: solid 1px;
+    float: left; 
+    width: 180px; 
+    height: 140px; 
+    margin: 10px; 
+    
+}
+
+
+.clearfix:before,
+.clearfix:after {
+    content: "";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
