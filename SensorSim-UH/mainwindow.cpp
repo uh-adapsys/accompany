@@ -530,6 +530,67 @@ void MainWindow::getLocations()
       }
    }
 
+   locQuery = "SELECT status from Sensors where sensorId = 51 LIMIT 1";
+
+   query = locQuery;
+
+   query.exec();
+
+   while(query.next())
+   {
+       if (query.value(0).toString() == "On")
+      {
+         ui->kettleCheckBox->setChecked(true);
+      }
+      else
+      {
+         ui->kettleCheckBox->setChecked(false);
+      }
+   }
+
+   locQuery = "SELECT status from Sensors where sensorId = 54 LIMIT 1";
+
+   query = locQuery;
+
+   query.exec();
+
+   while(query.next())
+   {
+       if (query.value(0).toString() == "On")
+      {
+         ui->microCheckBox->setChecked(true);
+      }
+      else
+      {
+         ui->microCheckBox->setChecked(false);
+      }
+   }
+
+   locQuery = "SELECT status from Sensors where sensorId = 56 LIMIT 1";
+
+   query = locQuery;
+
+   query.exec();
+
+   while(query.next())
+   {
+       if (query.value(0).toString() == "On")
+      {
+         ui->toasterCheckBox->setChecked(true);
+      }
+      else
+      {
+         ui->toasterCheckBox->setChecked(false);
+      }
+   }
+
+   firstTime = false;
+
+
+
+
+
+
    firstTime = false;
 }
 
@@ -805,4 +866,44 @@ void MainWindow::on_trayStatusCheckBox_clicked(bool checked)
     }
 
     updateSensorLog(501, checked, stat);
+}
+
+
+void MainWindow::on_kettleCheckBox_clicked(bool checked)
+{
+    if (firstTime) return;
+
+    QString stat = "On";
+    if (!checked)
+    {
+       stat = "Off";
+    }
+
+    updateSensorLog(51, checked, stat);
+}
+
+void MainWindow::on_microCheckBox_clicked(bool checked)
+{
+    if (firstTime) return;
+
+    QString stat = "On";
+    if (!checked)
+    {
+       stat = "Off";
+    }
+
+    updateSensorLog(54, checked, stat);
+}
+
+void MainWindow::on_toasterCheckBox_clicked(bool checked)
+{
+    if (firstTime) return;
+
+    QString stat = "On";
+    if (!checked)
+    {
+       stat = "Off";
+    }
+
+    updateSensorLog(56, checked, stat);
 }

@@ -1,13 +1,12 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2013-02-27T10:43:25
+# Project created by QtCreator 2014-07-17T10:17:20
 #
 #-------------------------------------------------
 
-QT       += core gui
-QT       += sql
+QT       += core gui sql
 
-TARGET = TeachMeShowMe
+TARGET = ruleEvaluator
 TEMPLATE = app
 
 

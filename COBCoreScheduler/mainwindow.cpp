@@ -556,7 +556,7 @@ void MainWindow::on_sequenceTableWidget_cellClicked(int row, int column)
     ui->SQLtableWidget->setRowCount(query.size());
 
     QStringList labs;
-    labs << "Behaviour" << "Rule/Action" << "Order" << "Description" << "And/Or" << "True/False";
+    labs << "Behaviour" << "Rule/Action" << "Order" << "True/False" << "Description" << "And/Or" ;
     ui->SQLtableWidget->setHorizontalHeaderLabels(labs);
 
     int nrow = 0;
@@ -569,27 +569,27 @@ void MainWindow::on_sequenceTableWidget_cellClicked(int row, int column)
         item->setTextAlignment(Qt::AlignCenter);
         item->setText(query.value(1).toString());
         ui->SQLtableWidget->setItem(nrow, 2, item);
-        ui->SQLtableWidget->setItem(nrow, 3, new QTableWidgetItem(query.value(2).toString()));
-        ui->SQLtableWidget->setItem(nrow, 4, new QTableWidgetItem(query.value(3).toString()));
+        ui->SQLtableWidget->setItem(nrow, 4, new QTableWidgetItem(query.value(2).toString()));
+        ui->SQLtableWidget->setItem(nrow, 5, new QTableWidgetItem(query.value(3).toString()));
 //    qDebug()<<query.value(0).toString();
 
         if (query.value(0).toString() == "Rule")
         {
-            ui->SQLtableWidget->setItem(nrow, 4, new QTableWidgetItem(query.value(3).toString()));
+            ui->SQLtableWidget->setItem(nrow, 5, new QTableWidgetItem(query.value(3).toString()));
             ui->SQLtableWidget->item(nrow, 1)->setBackgroundColor(Qt::gray);
         }
         else
         {
-            ui->SQLtableWidget->setItem(nrow, 4, new QTableWidgetItem(""));
+            ui->SQLtableWidget->setItem(nrow, 5, new QTableWidgetItem(""));
             ui->SQLtableWidget->item(nrow, 1)->setBackgroundColor(Qt::lightGray);
         }
 
-        ui->SQLtableWidget->setItem(nrow, 5, new QTableWidgetItem(query.value(4).toString()));
+        ui->SQLtableWidget->setItem(nrow, 3, new QTableWidgetItem(query.value(4).toString()));
 //         qDebug()<<query.value(4).toString();
 
         if (query.value(4).toString() == "False")
         {
-            ui->SQLtableWidget->item(nrow, 5)->setBackgroundColor(Qt::red);
+            ui->SQLtableWidget->item(nrow, 3)->setBackgroundColor(Qt::red);
         }
 
         ui->SQLtableWidget->resizeColumnsToContents();
@@ -873,8 +873,8 @@ bool MainWindow::evaluateRules(QString sequenceName, bool display)
             {
                 if (display)
                 {
-                    ui->SQLtableWidget->setItem(row, 5, new QTableWidgetItem("True"));
-                    ui->SQLtableWidget->item(row, 5)->setBackgroundColor(Qt::green);
+                    ui->SQLtableWidget->setItem(row, 3, new QTableWidgetItem("True"));
+                    ui->SQLtableWidget->item(row, 3)->setBackgroundColor(Qt::green);
                 }
                 result = true;
                 //         qDebug()<<" <-- true";
@@ -883,8 +883,8 @@ bool MainWindow::evaluateRules(QString sequenceName, bool display)
             {
                 if (display)
                 {
-                    ui->SQLtableWidget->setItem(row, 5, new QTableWidgetItem("False"));
-                    ui->SQLtableWidget->item(row, 5)->setBackgroundColor(Qt::red);
+                    ui->SQLtableWidget->setItem(row, 3, new QTableWidgetItem("False"));
+                    ui->SQLtableWidget->item(row, 3)->setBackgroundColor(Qt::red);
                 }
                 result = false;
                 //       qDebug()<<" <-- false";

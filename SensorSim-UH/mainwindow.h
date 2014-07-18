@@ -44,6 +44,9 @@ private slots:
     void on_sofa5CheckBox_clicked(bool checked);
     void on_TVCheckBox_clicked(bool checked);
     void on_trayStatusCheckBox_clicked(bool checked);
+    void on_kettleCheckBox_clicked(bool checked);
+    void on_microCheckBox_clicked(bool checked);
+    void on_toasterCheckBox_clicked(bool checked);
 };
 
 #endif // MAINWINDOW_H

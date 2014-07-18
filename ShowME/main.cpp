@@ -4,7 +4,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    QString param;
     MainWindow w;
+
 
     w.param="";
 
@@ -14,7 +17,7 @@ int main(int argc, char *argv[])
     while ((c = getopt (argc, argv, "b")) != -1)
 
     {
-
+        qDebug()<<c;
       switch (c)
       {
          case 'b':
@@ -25,8 +28,7 @@ int main(int argc, char *argv[])
             break;
       }
     }
-
-    if (!w.openDatabase())
+    if(!w.openDatabase())
     {
         return 0;
     }
@@ -39,5 +41,4 @@ int main(int argc, char *argv[])
     w.show();
 
     return a.exec();
-
 }
