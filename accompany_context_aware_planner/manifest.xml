@@ -15,10 +15,11 @@
   <depend package="tf"/>
   <depend package="opencv2"/>
   <depend package="nav_msgs"/>
-  
+  <depend package="accompany_uva_msg"/>
   <depend package="move_base_msgs"/>
   <depend package="actionlib"/>
   <rosdep name="libmysqlclient-dev"/>
+  
   
 <!--  <export>
 #  <cpp lflags="-lmysqlclient"/>

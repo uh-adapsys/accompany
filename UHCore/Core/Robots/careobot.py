@@ -39,6 +39,8 @@ class CareOBot(robot.ROSRobot):
         #Special handling of the unload_tray moveit code value='trayToTable:height'
         if name == 'arm' and str(value).startswith('trayToTable'):
             return self.unloadTray(str(value).split(':')[1], blocking)
+        if name == 'arm' and str(value).startswith('vaseToTray'):
+            return self.graspObject(str(value).split(':')[1], blocking)
         
         return super(CareOBot, self).setComponentState(name, value, blocking)
     
@@ -55,7 +57,22 @@ class CareOBot(robot.ROSRobot):
         
     def sleep(self, milliseconds):
         self.executeFunction("sleep", {'duration': milliseconds / 1000.0 })
+
+    def graspObject(self, height, blocking):
+        " Calls the 'take_object_server' on to grasp an object from a table assumed to be at the specified height"
+        try:
+            h = float(height)
+        except Exception as e:
+            print >> sys.stderr, "Unable to cast height to float, received height: %s" % height
+            
+        try:
+            client = GraspObjectClient()
+        except Exception as e:
+            print >> sys.stderr, "Unable to initialise GraspObjectClient. Error: %s" % repr(e)
+            return robot._states[4]
         
+        return client.graspObject(h, blocking)
+    
     def unloadTray(self, height, blocking):
         " Calls the 'unloadTrayServer' on to unload an object from the tray to a table assumed to be at the specified height"
 
@@ -71,6 +88,29 @@ class CareOBot(robot.ROSRobot):
             return robot._states[4]
         
         return client.unloadTray(h, blocking)
+        
+class GraspObjectClient(object):
+    
+    def __init__(self):
+        self._ros = rosHelper.ROS()
+        self._ros.configureROS(packageName='accompany_user_tests_year2')
+        import actionlib, accompany_user_tests_year2.msg
+        self._ssMsgs = accompany_user_tests_year2.msg
+        
+        self._ros.initROS()
+        self._client = actionlib.SimpleActionClient('/take_object_server', self._ssMsgs.TakeObjectShelfAction)
+        print "Waiting for take_object_server"
+        self._client.wait_for_server()
+        print "Connected to take_object_server"
+        
+    def graspObject(self, height, blocking):
+        goal = self._ssMsgs.TakeObjectShelfGoal()
+        goal.shelf_height = height
+        
+        if blocking:
+            return robot._states[self._client.send_goal_and_wait(goal)]
+        else:
+            return robot._states[self._client.send_goal(goal)]
         
 class UnloadTrayClient(object):
     

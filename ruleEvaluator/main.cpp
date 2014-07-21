@@ -4,7 +4,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    QString param;
     MainWindow w;
+
 
     w.param="";
 
@@ -26,7 +29,7 @@ int main(int argc, char *argv[])
       }
     }
 
-    if (!w.openDatabase())
+    if(!w.openDatabase())
     {
         return 0;
     }
@@ -38,6 +41,6 @@ int main(int argc, char *argv[])
 
     w.show();
 
-    return a.exec();
 
+    return a.exec();
 }

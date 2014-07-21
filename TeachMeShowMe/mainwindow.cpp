@@ -10,6 +10,8 @@
 QSqlDatabase db;
 bool dbOpen;
 
+
+
 //QStringListModel *learnedModel;
     QStringList learnedList;
 
@@ -33,12 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     closeDownRequest = false;
 
-    if (!openDatabase())
-    {
-       closeDownRequest = true;
-    }
 
-    initialiseGUI();
 }
 
 MainWindow::~MainWindow()
@@ -100,53 +97,56 @@ bool MainWindow::openDatabase()
        }
     }
 
-    user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
+    if (param != "BATCH")
+    {
+      user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
                                      user, &ok);
-    if (!ok)
-    {
-       closeDownRequest = true;
-       return false;
-    }
+      if (!ok)
+      {
+        closeDownRequest = true;
+        return false;
+      }
 
-    pw = QInputDialog::getText ( this, "Accompany DB", "Password:", QLineEdit::Password,
+      pw = QInputDialog::getText ( this, "Accompany DB", "Password:", QLineEdit::Password,
                                                                       pw, &ok);
-    if (!ok)
-    {
+      if (!ok)
+      {
+        closeDownRequest = true;
+        return false;
+      }
+
+
+      host = QInputDialog::getText ( this, "Accompany DB", "Host:",QLineEdit::Normal,
+                                     host, &ok);
+      if (!ok)
+      {
        closeDownRequest = true;
        return false;
-    }
+      };
 
-
-    host = QInputDialog::getText ( this, "Accompany DB", "Host:",QLineEdit::Normal,
-                                     host, &ok);
-    if (!ok)
-    {
-      closeDownRequest = true;
-      return false;
-    };
-
-    dBase = QInputDialog::getText ( this, "Accompany DB", "Database:",QLineEdit::Normal,
+      dBase = QInputDialog::getText ( this, "Accompany DB", "Database:",QLineEdit::Normal,
                                      dBase, &ok);
-    if (!ok)
-    {
-      closeDownRequest = true;
-      return false;
-    };
+      if (!ok)
+      {
+        closeDownRequest = true;
+        return false;
+      };
 
-    QString dbUser = "Database: " + user + ":" + host + ":" + dBase;
+    }
+      QString dbUser = "Database: " + user + ":" + host + ":" + dBase;
 
 
 
-    db = QSqlDatabase::addDatabase("QMYSQL");
+      db = QSqlDatabase::addDatabase("QMYSQL");
 
-    db.setHostName(host);
-    db.setDatabaseName(dBase);
-    db.setUserName(user);
-    db.setPassword(pw);
+      db.setHostName(host);
+      db.setDatabaseName(dBase);
+      db.setUserName(user);
+      db.setPassword(pw);
 
-    dbOpen = db.open();
+      dbOpen = db.open();
 
-    if (!dbOpen) {
+      if (!dbOpen) {
 
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Critical);
@@ -160,9 +160,9 @@ bool MainWindow::openDatabase()
 
 
         return false;
-    }
+      }
 
-    qDebug() << "Database Opened";
+      qDebug() << "Database Opened";
 
 
     QSqlQuery query("SELECT ExperimentalLocationId, SessionUser FROM SessionControl WHERE SessionId = 1 LIMIT 1");
@@ -196,6 +196,9 @@ bool MainWindow::openDatabase()
     }
 
     ui->dbLabel->setText(dbUser);
+
+
+    initialiseGUI();
 
     return true;
 
@@ -238,11 +241,10 @@ void MainWindow::initialiseGUI()
        ui->showMePushButton->setStyleSheet("QPushButton { background-color : green; color : white; }");
 
        ui->teachMePushButton->setEnabled(true);
-       ui->showMePushButton->setEnabled(false);
+       ui->showMePushButton->setEnabled(true);
 
        ui->teachMePushButton->show();
-       ui->showMePushButton->hide();
-  //     ui->showMePushButton->show();
+       ui->showMePushButton->show();
 
        QSqlQuery query;
 
@@ -314,7 +316,7 @@ void MainWindow::initialiseGUI()
 
 
        ui->whenTellMePushButton->hide();
-       ui->doingPushButton->hide();
+  //     ui->doingPushButton->hide();
 
 }
 
@@ -350,14 +352,31 @@ void MainWindow::on_cancelPushButton_clicked()
 
 void MainWindow::on_showMePushButton_clicked()
 {
-    ui->startLearningPushButton->setEnabled(true);
-    ui->showMePushButton->setEnabled(false);
-    ui->teachMePushButton->setEnabled(false);
-    ui->cancelPushButton->setEnabled(true);
 
-    ui->behNameComboBox->setEnabled(true);
-    ui->behNameComboBox->setStyleSheet("QComboBox { background-color : white; color : black; }");
-    ui->behNameComboBox->setFocus();
+    // Set up the command line which starts the external program as QStringList.
+        QStringList commandAndParameters;
+
+        /* Fill in the following things:
+         * - Name of program to execute.
+         * - Every option needed by the program.
+         * Attention: be aware of any strange options you pass to the program, e.g.
+         * IP addresses. Quoting these options will usually help.
+         */
+        commandAndParameters                         <<"-b";
+
+        /* Create a QProcess instance. It does not matter if it is created on the stack or
+         * on the heap. - Ahem, I tested it on Linux only. :-)
+         */
+        QProcess myProcess;
+
+        // Start the QProcess instance.
+  //      myProcess.start("/home/joe/git/accompany/TeachMeShowMe/TeachMeShowMe", commandAndParameters);
+        myProcess.start("/home/joe/git/accompany/ShowME/ShowME", commandAndParameters);
+        /* O.k., everything is fine now, leave the Qt application. The external program
+         * will continue running.
+         */
+
+        myProcess.waitForFinished(-1);
 }
 
 void MainWindow::on_startLearningPushButton_clicked()
@@ -1866,7 +1885,24 @@ void MainWindow::on_toldFinishedPushButton_clicked()
 
 void MainWindow::on_contextLearnItPushButton_clicked()
 {
-    addToLearningList("When: " + ui->contextComboBox->currentText());
+    QString txt;
+
+    QString context = ui->contextComboBox->currentText().section('(',1,1).section(')',0,0);
+    qDebug()<<context;
+    QString activity = ui->contextComboBox->currentText().section('(',0,0);
+    qDebug()<<activity;
+
+    txt = createForWithinMsg(context,
+                       ui->contextHappeningSpinBox->value(),
+                       ui->contextHasHappendedSpinBox->value(),
+                       "When: " + activity +" is active " ,
+                       "When: " + activity +" has been active for " ,
+                       "When: " + activity +" was active within the last ");
+
+
+    addToLearningList(txt);
+
+
     ui->contextFinishedPushButton->show();
 }
 
@@ -2022,10 +2058,17 @@ void MainWindow::on_finalRememberPushButton_clicked()
 
            // get the bit in brackets
 
+
            command = cmd.section("(",1,1);
            command = command.section(")",0,0);
 
            qDebug()<<"learned list      :: " <<command;
+
+
+           QString contextCmd = command.section("For:",0,0);  // context has two instances
+           contextCmd = contextCmd.section("Within:",0,0);  // context has two instances
+
+           qDebug()<<"learned list      :: " <<command << " " << contextCmd;
 
            // save the complete text
 
@@ -2064,8 +2107,10 @@ void MainWindow::on_finalRememberPushButton_clicked()
 
            generateForWithinSQL(command, "toiletFlush", "SELECT * FROM Sensors WHERE sensorId = 14 AND value = 1",actionText);
 
-           generateForWithinSQL(command, "context", "SELECT * FROM Sensors WHERE sensorId = " + command.right(3) + " AND value  = 1",actionText);
-
+           if (command.contains("context"))
+           {
+              generateForWithinSQL(command, contextCmd, "SELECT * FROM Sensors WHERE sensorId = " + contextCmd.right(3) + " AND value  = 1",actionText);
+           }
 
 
            // locations
@@ -2780,10 +2825,10 @@ void MainWindow::generateForWithinSQL(QString command, QString cmd, QString sql,
     QString withinStr = cmd + "Within";
 
 
-  //  qDebug()<<command;
-  //  qDebug()<<cmd;
-  //  qDebug()<<forStr;
-  //  qDebug()<<withinStr;
+    qDebug()<<command;
+    qDebug()<<cmd;
+    qDebug()<<forStr;
+    qDebug()<<withinStr;
 
     if (command.contains(forStr))
     {
@@ -2978,3 +3023,5 @@ void MainWindow::on_changePushButton_clicked()
  //   fillFinalView();
 
 }
+
+

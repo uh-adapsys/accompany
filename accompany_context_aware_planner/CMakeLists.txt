@@ -44,4 +44,7 @@ rosbuild_add_executable(accompany_context_aware_planner ros/src/ContextAwarePlan
 
 rosbuild_add_executable(getPotentialProxemicsLocations ros/src/getPotentialProxemicsLocations.cpp)
 
+rosbuild_add_executable(getUserPose ros/src/getUserPose.cpp)
+
 TARGET_LINK_LIBRARIES(accompany_context_aware_planner mysqlcppconn)
+TARGET_LINK_LIBRARIES(getUserPose mysqlcppconn)

@@ -14,6 +14,8 @@ public:
     ~MainWindow();
 
     bool closeDownRequest;
+     QString param;
+    bool openDatabase();
 
 protected:
     void changeEvent(QEvent *e);
@@ -25,7 +27,7 @@ private:
 ;
 
     void initialiseGUI();
-    bool openDatabase();
+
     void addToLearningList(QString learntItem);
     void checkOKVisibleFlag();
     void fillLocationWhen();
@@ -120,6 +122,7 @@ private slots:
     void on_repeatFinishedPushButton_clicked();
     void on_repeatLearnItPushButton_clicked();
     void on_changePushButton_clicked();
+
 };
 
 #endif // MAINWINDOW_H

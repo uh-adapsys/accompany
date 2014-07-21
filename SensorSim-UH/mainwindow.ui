@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>733</width>
-    <height>481</height>
+    <height>581</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>240</y>
+      <x>20</x>
+      <y>230</y>
       <width>701</width>
-      <height>181</height>
+      <height>281</height>
      </rect>
     </property>
     <property name="title">
@@ -42,8 +42,8 @@
     <widget class="QCheckBox" name="fridgeCheckBox">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>60</y>
+       <x>350</x>
+       <y>110</y>
        <width>361</width>
        <height>23</height>
       </rect>
@@ -95,7 +95,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>120</y>
+       <y>240</y>
        <width>241</width>
        <height>23</height>
       </rect>
@@ -107,8 +107,8 @@
     <widget class="QCheckBox" name="cupCheckBox">
      <property name="geometry">
       <rect>
-       <x>220</x>
-       <y>90</y>
+       <x>30</x>
+       <y>140</y>
        <width>221</width>
        <height>23</height>
       </rect>
@@ -159,14 +159,53 @@
     <widget class="QCheckBox" name="trayStatusCheckBox">
      <property name="geometry">
       <rect>
-       <x>270</x>
-       <y>120</y>
+       <x>260</x>
+       <y>230</y>
        <width>411</width>
        <height>23</height>
       </rect>
      </property>
      <property name="text">
       <string>Tray Status Lowered/Raised  (Raised if ticked) </string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="microCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>170</y>
+       <width>231</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Microwave On/Off (On if ticked)</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="kettleCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>140</y>
+       <width>201</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Kettle On/Off (On if ticked)</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="toasterCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>200</y>
+       <width>231</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Toaster (On of ticked)</string>
      </property>
     </widget>
    </widget>
