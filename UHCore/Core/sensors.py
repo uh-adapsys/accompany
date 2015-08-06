@@ -60,6 +60,7 @@ class ZWaveHomeController(PollingProcessor):
 		self._sensorDao = Sensors()
 		self._sensors = self._sensorDao.findSensors()
 		self._warned = []
+                self._connected = []
 
 	@property
 	def channels(self):
@@ -102,6 +103,10 @@ class ZWaveHomeController(PollingProcessor):
 					print "Warning: Unable to locate sensor record for ZWave sensor ID: %s (%s)" % (str(channelDescriptor), str(device['name']))
 					self._warned.append(channelDescriptor)
 				continue
+                        else:
+				if sensor['ChannelDescriptor'] not in self._connected:
+					print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+					self._connected.append(sensor['ChannelDescriptor'])
 	
 			_device = sensor['locationName']
 			_pin = sensor['name']
@@ -161,6 +166,7 @@ class ZWaveVeraLite(PollingProcessor):
 		self._sensorDao = Sensors()
 		self._sensors = self._sensorDao.findSensors()
 		self._warned = []
+                self._connected = []
 
 	@property
 	def channels(self):
@@ -207,6 +213,10 @@ class ZWaveVeraLite(PollingProcessor):
 					print "Warning: Unable to locate sensor record for ZWave sensor ID: %s (%s)" % (str(channelDescriptor), str(device['name']))
 					self._warned.append(channelDescriptor)
 				continue
+                        else:
+				if sensor['ChannelDescriptor'] not in self._connected:
+					print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+					self._connected.append(sensor['ChannelDescriptor'])
 	
 			_device = sensor['locationName']
 			_pin = sensor['name']
@@ -257,6 +267,7 @@ class ZigBeeDirect(PollingProcessor):
 		self._sensorDao = Sensors()
 		self._sensors = self._sensorDao.findSensors()
 		self._warned = []
+                self._connected = []
 	
 	def __del__(self):
 		self._port.close()
@@ -311,6 +322,10 @@ class ZigBeeDirect(PollingProcessor):
 						print "Warning: Unable to locate sensor record for ZigBee sensor ID: %s" % (str(mac) + str(channel))
 						self._warned.append(str(mac) + str(channel))
 					continue
+		                else:
+					if sensor['ChannelDescriptor'] not in self._connected:
+						print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+						self._connected.append(sensor['ChannelDescriptor'])
 					
 				_device = sensor['locationName']
 				_pin = sensor['name']
@@ -359,6 +374,7 @@ class ZigBee(PollingProcessor):
 		self._sensorDao = Sensors()
 		self._sensors = self._sensorDao.findSensors()
 		self._warned = []
+                self._connected = []
 
 	@property
 	def channels(self):
@@ -398,6 +414,10 @@ class ZigBee(PollingProcessor):
 				print "Warning: Unable to locate sensor record for ZigBee sensor ID: %s" % (str(mac) + str(channel))
 				self._warned.append(str(mac) + str(channel))
 			return
+                else:
+			if sensor['ChannelDescriptor'] not in self._connected:
+				print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+				self._connected.append(sensor['ChannelDescriptor'])
 
 		_device = sensor['locationName']
 		_pin = sensor['name']
@@ -437,6 +457,7 @@ class GEOSystem(PollingProcessor):
 		self._sr = StateResolver()
 		self._channels = {}
 		self._warned = []
+                self._connected = []
 
 	@property
 	def channels(self):		
@@ -465,6 +486,10 @@ class GEOSystem(PollingProcessor):
 					print "Warning: Unable to locate sensor record for GEO sensor %s. ID: %s" % (row['Description'], row['ID'])
 					self._warned.append(row['ID'])
 				continue
+		        else:
+				if sensor['ChannelDescriptor'] not in self._connected:
+					print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+					self._connected.append(sensor['ChannelDescriptor'])
 
 			_device = sensor['locationName']
 			_name = sensor['name']
@@ -499,6 +524,8 @@ if __name__ == '__main__':
 	if activeLocation == None:
 		print "Unable to determine active experiment Location"
 		exit
+        else:
+                print "Loading settings for experiment location %s" % (activeLocation['location'], )
 	
 	sensorPollers = []
 	dataUpdaters = []

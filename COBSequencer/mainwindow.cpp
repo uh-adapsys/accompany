@@ -34,6 +34,8 @@ int experimentLocation;   // 1 = UH, 2=ZUYD, 3=Madopa
 int defaultUserId;
 int activeRobot;
 
+QStringListModel model;
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -643,8 +645,6 @@ void MainWindow::on_seqAddButton_clicked()
 
     ui->addActionButton->setEnabled(true);
 
-    ui->pythonCreatePushButton->setEnabled(true);
-
     fillActionRuleTable("");
 
     globalRuleCount = 0;
@@ -690,6 +690,10 @@ void MainWindow::on_SeqComboBox_activated(QString seqName)
               globalRuleCount   = query.value(3).toInt();
               globalActionCount = query.value(4).toInt();
 
+
+              qDebug()<<"GRC: " << globalRuleCount << "RC: " << ruleCount;
+
+              ruleCount = globalRuleCount;
 
               fillActionRuleTable(seqName);
           }
@@ -832,6 +836,7 @@ void MainWindow::on_seqDelButton_clicked()
 
     resetGui();
 
+    ruleCount = 0;
     globalRuleCount = 0;
     globalActionCount = 0;
 
@@ -856,11 +861,16 @@ void MainWindow::fillActionRuleTable(QString seqName)
 
     query.bindValue(":name",seqName);
 
-    QStringListModel *model = new QStringListModel();
+  //  QStringListModel *model = new QStringListModel();
     QStringList list;
 
+    int n = model.rowCount();
+
+    model.removeRows(0,n);
 
     QString raText;
+
+    QString seqErr = "R";
 
     if (query.exec())
     {
@@ -875,12 +885,27 @@ void MainWindow::fillActionRuleTable(QString seqName)
 
            if (query.value(2) == "R")
            {
-               raText += "RULE->" ;
+               if (seqErr == "A")    // this means the last row was an action
+               {
+                   QMessageBox msgBox;
+                   msgBox.setIcon(QMessageBox::Warning);
+
+                   msgBox.setText("Rule/Action order mismatch- Rules must be before actions!");
+                   msgBox.exec();
+
+                   raText += "RULE ** ERROR ** ->" ;
+               }
+               else
+               {
+                   raText += "RULE->" ;
+               }
            }
 
            if (query.value(2) == "A")
            {
                raText += "   ACTION->" ;
+
+               seqErr = "A";
            }
 
            raText += query.value(5).toString();
@@ -907,17 +932,15 @@ void MainWindow::fillActionRuleTable(QString seqName)
 
    }
 
-   model->setStringList(list);
+   model.setStringList(list);
 
-   ui->ruleListView->setModel( model );
+   ui->ruleListView->setModel( &model );
    ui->ruleListView->setEditTriggers(0);
 
    ui->addRuleButton->setEnabled(true);
    ui->delRuleButton->setEnabled(false);
 
    ui->addActionButton->setEnabled(true);
-   ui->pythonCreatePushButton->setEnabled(true);
-
 
 
 }
@@ -1436,6 +1459,40 @@ void MainWindow::on_addRuleButton_clicked()
                                ui->ZUYDFridgeORRadioButton->isChecked());
 
 
+
+           // E125 Sensors
+
+                  fillRuleActionTable("E125 Small Sofa 1 seat 1",
+                                      2001,
+                                     "occupied:unoccupied",
+                                     ui->E125_SS1_CheckBox->isChecked(),
+                                     ui->E125_SS1_Occupied_RadioButton->isChecked(),
+                                     ui->E125_SS1_AND_RadioButton->isChecked(),
+                                     ui->E125_SS1_OR_RadioButton->isChecked());
+
+                  fillRuleActionTable("E125 Small Sofa 2 seat 1",
+                                      2006,
+                                     "occupied:unoccupied",
+                                     ui->E125_SS2_CheckBox->isChecked(),
+                                     ui->E125_SS2_Occupied_RadioButton->isChecked(),
+                                     ui->E125_SS2_AND_RadioButton->isChecked(),
+                                     ui->E125_SS2_OR_RadioButton->isChecked());
+
+                  fillRuleActionTable("E125 Long Sofa  seat 1",
+                                      2002,
+                                     "occupied:unoccupied",
+                                     ui->E125_LS1_CheckBox->isChecked(),
+                                     ui->E125_LS1_Occupied_RadioButton->isChecked(),
+                                     ui->E125_LS1_AND_RadioButton->isChecked(),
+                                     ui->E125_LS1_OR_RadioButton->isChecked());
+
+                  fillRuleActionTable("E125 Long Sofa  seat 2",
+                                      2003,
+                                     "occupied:unoccupied",
+                                     ui->E125_LS2_CheckBox->isChecked(),
+                                     ui->E125_LS2_Occupied_RadioButton->isChecked(),
+                                     ui->E125_LS2_AND_RadioButton->isChecked(),
+                                     ui->E125_LS2_OR_RadioButton->isChecked());
     //---------------------------------------------------------------
 
     // Goals
@@ -1484,6 +1541,16 @@ void MainWindow::on_addRuleButton_clicked()
             rule = "CALL spBetweenTimeCheck('" + v + "','23:59:59')";
         }
 
+        if (ui->timeBeforeRadioButton->isChecked())
+        {
+            QString v = ui->timeEdit_1->time().toString();
+
+            ruletext = "Time is before " + v;
+
+         //   rule = "SELECT 1 from DUAL Where (SELECT TIMEDIFF(CURTIME(),'" + v + "') > 0)";
+
+            rule = "CALL spBetweenTimeCheck('00:00:00','" + v + "')";
+        }
 
         if (ui->timeBetweenRadioButton->isChecked())
         {
@@ -2853,6 +2920,7 @@ void MainWindow::on_timeCheckBox_toggled(bool checked)
 {
     ui->timeEdit_1->setEnabled(checked);
     ui->timeAtRadioButton->setEnabled(checked);
+    ui->timeBeforeRadioButton->setEnabled(checked);
     ui->timeBetweenRadioButton->setEnabled(checked);
 
     if (ui->timeAtRadioButton->isChecked())
@@ -3085,6 +3153,9 @@ void MainWindow::fillRuleActionTable(QString name, int Id, QString type, bool ch
            query.bindValue(":andOrConnector",2);
         }
       }
+
+      qDebug()<<"Rule count:" << ruleCount;
+      qDebug()<<"And count:" << ruleCount;
 
       if (ruleCount > 1)
       {
@@ -3442,6 +3513,7 @@ void MainWindow::resetGui()
 
     ui->timeEdit_1->setEnabled(false);
     ui->timeAtRadioButton->setEnabled(false);
+    ui->timeBeforeRadioButton->setEnabled(false);
     ui->timeAtRadioButton->setChecked(true);
     ui->timeBetweenRadioButton->setEnabled(false);
     ui->timeEdit_2->setEnabled(false);
@@ -3509,7 +3581,43 @@ void MainWindow::resetGui()
 
     // end ZUYD Sensors
 
+    // E125 Sensors
 
+    ui->E125_SS1_Occupied_RadioButton->setEnabled(false);
+    ui->E125_SS2_Occupied_RadioButton->setEnabled(false);
+    ui->E125_LS1_Occupied_RadioButton->setEnabled(false);
+    ui->E125_LS2_Occupied_RadioButton->setEnabled(false);
+
+    ui->E125_SS1_NotOccupied_RadioButton->setEnabled(false);
+    ui->E125_SS2_NotOccupied_RadioButton->setEnabled(false);
+    ui->E125_LS1_NotOccupied_RadioButton->setEnabled(false);
+    ui->E125_LS2_NotOccupied_RadioButton->setEnabled(false);
+
+    ui->E125_SS1_NotOccupied_RadioButton->setChecked(true);
+    ui->E125_SS2_NotOccupied_RadioButton->setChecked(true);
+    ui->E125_LS1_NotOccupied_RadioButton->setChecked(true);
+    ui->E125_LS2_NotOccupied_RadioButton->setChecked(true);
+
+
+    ui->E125_SS1_AND_RadioButton->setEnabled(false);
+    ui->E125_SS2_AND_RadioButton->setEnabled(false);
+    ui->E125_LS1_AND_RadioButton->setEnabled(false);
+    ui->E125_LS2_AND_RadioButton->setEnabled(false);
+
+    ui->E125_SS1_AND_RadioButton->setChecked(true);
+    ui->E125_SS2_AND_RadioButton->setChecked(true);
+    ui->E125_LS1_AND_RadioButton->setChecked(true);
+    ui->E125_LS2_AND_RadioButton->setChecked(true);
+
+    ui->E125_SS1_OR_RadioButton->setEnabled(false);
+    ui->E125_SS2_OR_RadioButton->setEnabled(false);
+    ui->E125_LS1_OR_RadioButton->setEnabled(false);
+    ui->E125_LS2_OR_RadioButton->setEnabled(false);
+
+
+
+
+    // end E125 Sensors
 
     query.clear();
 
@@ -3679,13 +3787,9 @@ void MainWindow::resetGui()
 
      fillActionRuleTable("");
 
-     ui->pythonCreatePushButton->setEnabled(false);
      ui->addActionButton->setEnabled(false);
      ui->addRuleButton->setEnabled(false);
      ui->delRuleButton->setEnabled(false);
-
-     ui->QBpushButton->setEnabled(false);
-     ui->pythonCreatePushButton->setEnabled(false);
 
 }
 
@@ -3918,734 +4022,7 @@ void MainWindow::on_robotDelayCheckBox_toggled(bool checked)
     }
 }
 
-void MainWindow::on_pythonCreatePushButton_clicked()
-{
-  //  QString fileName = QFileDialog::getOpenFileName(this,
-  //       tr("Open Python Script"), "/home/joe/git/care-o-bot/cob-script-server-tutorial/scripts/",
-  //                  tr("Python Scripts (*.py)"));
 
-
-    if (globalRuleCount == 0 && globalActionCount == 0)
-    {
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-
-        msgBox.setText("No rules or actions have been specified!");
-        msgBox.exec();
-        return;
-    }
-
-    QString dir = "/home/joe/QTProjects/COBSequencer/scripts/";
-    QString sequenceName = ui->SeqComboBox->currentText();
-
-    QString saveFile = dir + sequenceName + ".py";
-
-  //  qDebug()<<"DIR-> "<<saveFile;
-
-    QString fileName = QFileDialog::getSaveFileName(this,
-         tr("Open Python Script"), saveFile,
-                    tr("Python Scripts (*.py)"));
-
- //   qDebug()<<"Selected-> " << fileName;
-
-    QSqlQuery query;
-
-    // count the number of rules and actions
-
-    //int localActionCount = 0;
-    int localRuleCount = 0;
-
-    query.clear();
-
-
-    query.prepare("SELECT * FROM ActionRules where name=:name and ruleType = :ruleStr and ExperimentalLocationId = :locn");
-
-    query.bindValue(":locn",experimentLocation);
-    query.bindValue(":name",sequenceName );
-    query.bindValue(":ruleStr","R");
-
-    if (!query.exec())
-    {
-        qDebug() << "Can't select from actionrules table!" << query.executedQuery();
-        return;
-    }
-
-    localRuleCount = query.size();
- //   qDebug()<<  localRuleCount ;
-
-    query.clear();
-
-    query.prepare("SELECT * FROM  ActionRules WHERE name = :name and ExperimentalLocationId = :locn ORDER BY ruleOrder");
-
-    query.bindValue(":locn",experimentLocation);
-    query.bindValue(":name",sequenceName );
-
-    if (!query.exec())
-    {
-        qDebug() << "Can't select from actionrules table!" << query.executedQuery();
-        return;
-    }
-
-
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        qDebug()<< "Cannot open file for writing: " << qPrintable(file.errorString());
-        return;
-    }
-
-    QTextStream out(&file);
-
-
-    int imageHistory = QMessageBox::question(this, tr("COB Sequencer"),
-                                    tr("Do you want to include image history?"),
-                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-
-    int initialisation = QMessageBox::question(this, tr("COB Sequencer"),
-                                    tr("Do you want to include component initialisation?"),
-                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-
-    // imports
-
-    out << "#!/usr/bin/python" << endl;
-    out << "" << endl;
-    out << "### This is an auto-generated script - do not edit ###" << endl;
-    out << "" << endl;
-    out << "import subprocess" << endl;
-    out << "import time" << endl;
-    out << "import sys" << endl;
-    out << "sys.path.append('/home/joe/QTProjects/Core/')" << endl;
-
-    out << "import roslib" << endl;
-    out << "roslib.load_manifest('cob_script_server')" << endl;
-    out << "import rospy" << endl;
-    out << "" << endl;
-    out << "from simple_script_server import script" << endl;
-    out << "from config import *            # contains configuration details for UH Robot House inc. DB login info" << endl;
-    out << "" << endl;
-    out << "import MySQLdb" << endl;
-
-    if (imageHistory == QMessageBox::Yes)
-    {
-       out << "import history" << endl;
-    }
-
-    out << "" << endl;
-
-    // main class - initialise and start sql
-
-    out << "#--------------------------------------------------------------------------------" << endl;
-    out << "class " << sequenceName << "(script):" << endl;
-    out << "" << endl;
-
-    out << "  def Initialize(self):" << endl;
-    out << "" << endl;
-    out << "    if not self.sss.parse:" << endl;
-    out << "       rospy.loginfo(\" *********** This is the " << sequenceName << " script ************** \")" << endl;
-    out << "" << endl;
-
-    if (initialisation == QMessageBox::Yes)
-    {
-       out << "    if not self.sss.parse:" << endl;
-       out << "       rospy.loginfo(\"Initializing all components...\")" << endl;
-       out << "" << endl;
-       out << "    self.sss.init(\"tray\")" << endl;
-       out << "    self.sss.init(\"torso\")" << endl;
-       out << "    self.sss.init(\"arm\")" << endl;
-       out << "" << endl;
-    }
-
-    out << "# get a DB connection" << endl;
-    out << "" << endl;
-    out << "    if not self.sss.parse:" << endl;
-    out << "       try:" << endl;
-    out << "" << endl;
-    out << "          self.conn = MySQLdb.connect(server_config['mysql_log_server']," << endl;
-    out << "                                      server_config['mysql_log_user']," << endl;
-    out << "                                      server_config['mysql_log_password']," << endl;
-    out << "                                      server_config['mysql_log_db'])" << endl;
-    out << "" << endl;
-    out << "       except MySQLdb.Error, e:" << endl;
-    out << "          print \"Error %d: %s\" % (e.args[0], e.args[1])" << endl;
-    out << "          sys.exit (1)" << endl;
-    out << "" << endl;
-    out << "       rospy.loginfo('MySQL  initialized')" << endl;
-    out << "" << endl;
-
-    // run method
-
-    out << "#--------------------------------------------------------------------------------" << endl;
-    out << "  def Run(self):" << endl;
-
-    if (localRuleCount > 0)
-    {
-       out << "" << endl;
-       out << "    overallresult=checkRules(self);        # check the rule set" << endl;
-       out << "" << endl;
-    }
-    else
-    {
-        out << "" << endl;
-        out << "# No rules found!" << endl;
-        out << "" << endl;
-        out << "    overallresult=True;        # no rules thus execute all actions" << endl;
-        out << "" << endl;
-    }
-    // Image history
-
-
-
-
-    if (imageHistory == QMessageBox::Yes)
-    {
-        out << "" << endl;
-        out << "    if not self.sss.parse:" << endl;
-        out << "       if (overallresult):" << endl;
-        out << "          image = history.ActionHistory()" << endl;
-        out << "          image.addPollingHistory('" << sequenceName <<"',5.0)" << endl;
-        out << "" << endl;
-
-    }
-
-    bool generateGUICode = false;
-    QString GUIScripts = "";
-
-    while(query.next())
-    {
-   //      qDebug()<< query.value(5).toString();
-
-         if (query.value(2).toString() == "A")
-         {
-
-
-            out << "    if not self.sss.parse:" << endl;
-            out <<"       rospy.loginfo(\"" << query.value(5).toString() << "\")" << endl;
-            out << "" << endl;
-            out << "    if (overallresult):" << endl;
-
-            QString actionString = query.value(7).toString();
-
-       //     qDebug()<< query.value(7).toString();
-
-            QString action  = actionString.section(',',0,0);
-            QString robot   = actionString.section(',',1,1);
-            QString param1  = actionString.section(',',2,2);
-            QString param2  = actionString.section(',',3,3);
-            QString wait    = actionString.section(',',4,4);
-
-            if (robot != "0")
-            {
-               QMessageBox msgBox;
-               msgBox.setIcon(QMessageBox::Warning);
-
-               msgBox.setText("Can only generate python for Care-o-Bot at present!");
-               msgBox.exec();
-       //        return;
-            }
-            
-            if (action == "base")
-            {
-                param1.replace(":",",");
-
-                if (wait =="")
-                {
-                   out <<"       self.sss.move(\"base\"," << param1 << ",False)" << endl;
-                }
-                else
-                {
-                   out <<"       self.sss.move(\"base\"," << param1 << ",True)" << endl;
-                }
-
-            }
-            
-
-            if (action == "torso")
-            {
-                if (wait =="")
-                {
-                   out <<"       self.sss.move(\"torso\",\"" << param1 << "\",False)" << endl;
-                }
-                else
-                {
-                   out <<"       self.sss.move(\"torso\",\"" << param1 << "\",True)" << endl;
-                }
-                if (param2 != "")
-                {
-
-                    if (wait =="")
-                    {
-                      out <<"       self.sss.move(\"torso\",\"" << param2 << "\"),False" << endl;
-                    }
-                    else
-                    {
-                       out <<"       self.sss.move(\"torso\",\"" << param2 << "\",True)" << endl;
-                    }
-                }
-
-            }
-
-            if (action == "tray")
-            {
-                if (wait =="")
-                {
-                   out <<"       self.sss.move(\"tray\",\"" << param1 << "\",False)" << endl;
-                }
-                else
-                {
-                   out <<"       self.sss.move(\"tray\",\"" << param1 << "\",True)" << endl;
-                }
-
-            }
-
-            if (action == "light")
-            {
-              out <<"       self.sss.set_light(\"" << param1 << "\")" << endl;
-            }
-
-            if (action == "speak")
-            {
-              out <<"       self.sss.say([\"" << param1 << "\"])" << endl;
-            }
-
-            if (action == "sequence")
-            {
-
-              QString fullFN = dir + param1 + ".py";
-
-              out <<"       proc = subprocess.Popen(\"" << fullFN << "\",shell=True, stderr=subprocess.PIPE)" << endl;
-              out <<"       return_code = proc.wait()" << endl;
-              out <<"       for line in proc.stderr:" << endl;
-              out <<"          if (line.rstrip() == \"Failure\"):" << endl;
-              out <<"              overallresult = False" << endl;
-
-            }
-
-            if (action == "sleep")
-            {
-               out <<"       self.sss.sleep(" << param1 << ")" << endl;
-            }
-
-            if (action == "GUI")
-            {
-               generateGUICode = true;
-               GUIScripts = param1;
-
-               out <<"       displayGUI(self)" << endl;
-            }
-
-
-            if (action == "cond")
-            {
-
-                out << "       if not self.sss.parse:" << endl;
-                out << "          cursorSequence = self.conn.cursor()" << endl;
-                QString TF = "true";
-                if (param2 == "0") TF = "false";
-
-                out << "          sqlSequence = \"INSERT INTO SensorLog (timestamp,sensorId,room,channel,value,status) VALUES (NOW()," << param1 << "\\" << endl;
-                out << "               ,'','','" << param2 << "','" << TF << "')\"" << endl;                                                                                                       500,
-                out << "          cursorSequence.execute(sqlSequence)" << endl;
-
-            }
-
-            out << "    else:" << endl;
-            out << "      if not self.sss.parse:" << endl;
-            out <<"         rospy.loginfo(\"Action not executed as rule is invalid!\")" << endl;
-            out << "" << endl;
-
-            out << "    if not self.sss.parse:" << endl;
-            out << "      if (overallresult):" << endl;
-            out << "        sys.stderr.write('Success\\n')" << endl;
-            out << "      else:" << endl;
-            out << "        sys.stderr.write('Failure\\n')" << endl;
-            out << "" << endl;
-
-         //   if (imageHistory == QMessageBox::Yes)
-         //   {
-         //       out << "" << endl;
-         //       out << "    if not self.sss.parse:" << endl;
-          //      out << "       if (overallresult):" << endl;
-         //       out << "          image.addHistoryAsync('" << sequenceName <<"')" << endl;
-          //      out << "" << endl;
-//
-          //  }
-
-         }
-
-
-    }
-
-    if (imageHistory == QMessageBox::Yes)
-    {
-       out << "" << endl;
-       out << "    if not self.sss.parse:" << endl;
-       out << "          image.cancelPollingHistory('" << sequenceName <<"')" << endl;
-       out << "" << endl;
-
-    }
-
-    if (localRuleCount == 0)
-    {
-       goto checkGUI;
-    }
-
-    // rule checker
-
-    out << "" << endl;
-    out << "#--------------------------------------------------------------------------------" << endl;
-    out << "def checkRules(self):" << endl;
-    out << "" << endl;
-    out << "" << endl;
-    out << "   # this queries the database rules, executes each and veryfies final result" << endl;
-    out << "" << endl;
-    out << "    overallresult = False    # assume the rule set doesn't apply" << endl;
-    out << "" << endl;
-    out << "   # this extracts the rules set for this script from the database and checks each rule in turn" << endl;
-    out << "   # the rules are and'ed or or'ed based on the rule set" << endl;
-    out << "" << endl;
-    out << "    if not self.sss.parse:" << endl;
-    out << "" << endl;
-    out << "         cursorSequence = self.conn.cursor()" << endl;
-    out << "" << endl;
-
-
-    out << "         sqlSequence = \"SELECT   *  FROM  ActionRules\\" << endl;
-    out << "                          WHERE     name = \'" << sequenceName << "\'\\"<< endl;
-    out << "                            AND     ruleType = \'R\'\\" << endl;
-    out << "                          ORDER BY  ruleOrder\"" << endl;
-
-
-    out << "" << endl;
-    out << "         # get the sequence from the sql query" << endl;
-    out << "" << endl;
-    out << "         cursorSequence.execute(sqlSequence)" << endl;
-    out << "" << endl;
-    out << "         sequenceRows = cursorSequence.fetchall()" << endl;
-    out << "" << endl;
-    out << "         # for each row execute the rule to see it is valid" << endl;
-    out << "" << endl;
-    out << "         recCount = 0" << endl;
-    out << "" << endl;
-    out << "         try:" << endl;
-    out << "           for sequenceRow in sequenceRows:" << endl;
-    out << "" << endl;
-    out << "              recCount = recCount + 1" << endl;
-    out << "" << endl;
-    out << "              ANDORSwitch = \"\"" << endl;
-    out << "" << endl;
-    out << "              andOr = sequenceRow[4]" << endl;
-    out << "" << endl;
-    out << "              if andOr== 1:" << endl;
-    out << "                 ANDORSwitch = \"AND\"" << endl;
-    out << "" << endl;
-    out << "              if andOr== 2:" << endl;
-    out << "                 ANDORSwitch = \"OR\"" << endl;
-    out << "" << endl;
-    out << "              rospy.loginfo(\"%s %s\",sequenceRow[5],ANDORSwitch)" << endl;
-    out << "" << endl;
-    out << "              # now do each rule" << endl;
-    out << "" << endl;
-    out << "              cursorRule = self.conn.cursor()" << endl;
-    out << "" << endl;
-    out << "              sqlRule = sequenceRow[6];" << endl;
-    out << "" << endl;
-    out << "              cursorRule.execute(sqlRule)" << endl;
-    out << "" << endl;
-    out << "              ruleRows = cursorRule.fetchone()" << endl;
-    out << "" << endl;
-    out << "              # returning data means that the rule is true" << endl;
-    out << "" << endl;
-    out << "              if (ruleRows==None):" << endl;
-    out << "                 rospy.loginfo(\"%s FALSE\",sqlRule)" << endl;
-    out << "                 result = False" << endl;
-    out << "              else:" << endl;
-    out << "                 rospy.loginfo(\"%s TRUE\",sqlRule)" << endl;
-    out << "                 result = True " << endl;
-    out << "" << endl;
-    out << "              if (recCount == 1): " << endl;
-    out << "                 overallresult = result" << endl;
-    out << "                 prevANDORSwitch = ANDORSwitch" << endl;
-    out << "              else:                                  # now AND or OR each row in turn" << endl;
-    out << "                 if (prevANDORSwitch == \"OR\"):" << endl;
-    out << "                    overallresult = overallresult or result" << endl;
-    out << "                 if (prevANDORSwitch == \"AND\"):" << endl;
-    out << "                    overallresult = overallresult and result" << endl;
-    out << "                 if (prevANDORSwitch == \"\"):" << endl;
-    out << "                    overallresult = overallresult and result;" << endl;
-    out << "" << endl;
-    out << "                 prevANDORSwitch = ANDORSwitch" << endl;
-    out << "" << endl;
-    out << "           if (overallresult):                      # final result" << endl;
-    out << "             rospy.loginfo(\"Total Rule Set is VALID! :) \")" << endl;
-    out << "           else:" << endl;
-    out << "             rospy.loginfo(\"Total Rule Set is INVALID :( \")" << endl;
-    out << "" << endl;
-    out << "         except MySQLdb.Error, e:" << endl;
-    out << "           rospy.loginfo(\"Error %d: %s\" % (e.args[0],e.args[1]))" << endl;
-    out << "           sys.exit(1)  " << endl;
-    out << "" << endl;
-    out << "         finally:   " << endl;
-    out << "           cursorSequence.close() " << endl;
-    out << "" << endl;
-    out << "         return overallresult" << endl;
-    out << "" << endl;
-
-    checkGUI:
-
-    // User Interface
-
-    QString script1, script2,script3,script4;
-    QString fullFN1, fullFN2, fullFN3, fullFN4;
-
-    if (!generateGUICode)
-    {
-        goto mainCall;
-    }
-
-    out << "" << endl;
-    out << "#--------------------------------------------------------------------------------" << endl;
-    out << "def displayGUI(self):" << endl;
-    out << "" << endl;
-    out << "   # this sets up the database for GUI display and waits for a result" << endl;
-    out << "   # It then executes a script depending on user response" << endl;
-    out << "" << endl;
-    out << "   if not self.sss.parse:" << endl;
-    out << "" << endl;
-    out << "      cursorSequence = self.conn.cursor()" << endl;
-    out << "" << endl;
-    out << "      sqlSequence = \"UPDATE userInterfaceGUI SET guiMsgResult = NULL\\" << endl;
-    out << "                      WHERE name = '" << sequenceName << "'\"" << endl;
-    out << "" << endl;
-    out << "      try:" << endl;
-    out << "         cursorSequence.execute(sqlSequence)  # get the sequence from the sql query  " << endl;
-    out << "         self.conn.commit()                   # Commit  changes in the database" << endl;
-    out << "" << endl;
-    out << "      except MySQLdb.Error, e:" << endl;
-    out << "         rospy.loginfo(\"Error %d: %s\" % (e.args[0],e.args[1]))" << endl;
-    out << "         self.rollback()" << endl;
-    out << "         self.conn.close()" << endl;
-    out << "         sys.exit(1)" << endl;
-    out << "" << endl;
-    out << "      awaitingUserResponse = True" << endl;
-    out << "      resultFromUser = 0" << endl;
-    out << "      numSeconds = 0" << endl;
-    out << "" << endl;
-    out << "      rospy.loginfo(\"Waiting for user response...\")" << endl;
-    out << "" << endl;
-    out << "      while awaitingUserResponse:" << endl;
-    out << "" << endl;
-    out << "         time.sleep(1)" << endl;
-    out << "" << endl;
-    out << "         numSeconds = numSeconds + 1" << endl;
-    out << "" << endl;
-    out << "         if (numSeconds > 60):" << endl;
-    out << "            rospy.loginfo(\"Error: waited too long for user response - exiting!\")" << endl;
-    out << "            sys.exit(1)  " << endl;
-    out << "" << endl;
-    out << "         sqlSequence = \"SELECT * FROM  userInterfaceGUI WHERE name = '" << sequenceName << "'\"" << endl;
-    out << "         cursorSequence.execute(sqlSequence)      # get the sequence from the sql query" << endl;
-    out << "         sequenceRows = cursorSequence.fetchall()" << endl;
-    out << "" << endl;
-    out << "         try:" << endl;
-    out << "" << endl;
-    out << "          for sequenceRow in sequenceRows:      # for each row execute the rule to see it is valid " << endl;
-    out << "" << endl;
-    out << "            resultFromUser = sequenceRow[13]" << endl;
-    out << "" << endl;
-    out << "            if (resultFromUser == None): # no response" << endl;
-    out << "               break" << endl;
-    out << "" << endl;
-    out << "            awaitingUserResponse = False" << endl;
-    out << "" << endl;
-    out << "            rospy.loginfo(\"User entered %s\",resultFromUser)" << endl;
-    out << "" << endl;
-
-    script1 = GUIScripts.section("@",0,0);
-    script2 = GUIScripts.section("@",1,1);
-    script3 = GUIScripts.section("@",2,2);
-    script4 = GUIScripts.section("@",3,3);
-
-  //  qDebug()<< script1 <<" "<< script2 << " " << script3<< " " << script4;
-
-    fullFN1 = dir + script1 + ".py";
-    fullFN2 = dir + script2 + ".py";
-    fullFN3 = dir + script3 + ".py";
-    fullFN4 = dir + script4 + ".py";
-
-
-     if (script1 != "")
-     {
-        out << "            if (resultFromUser == 1):" << endl;
-        out <<"                proc = subprocess.Popen(\"" << fullFN1 << "\",shell=True, stderr=subprocess.PIPE)" << endl;
-        out <<"                return_code = proc.wait()" << endl;
-        out <<"                for line in proc.stderr:" << endl;
-        out <<"                  if (line.rstrip() == \"Failure\"):" << endl;
-        out <<"                     overallresult = False" << endl;
-        out << "" << endl;
-    }
-
-    if (script2 != "")
-    {
-        out << "            if (resultFromUser == 2):" << endl;
-        out <<"                proc = subprocess.Popen(\"" << fullFN2 << "\",shell=True, stderr=subprocess.PIPE)" << endl;
-        out <<"                return_code = proc.wait()" << endl;
-        out <<"                for line in proc.stderr:" << endl;
-        out <<"                  if (line.rstrip() == \"Failure\"):" << endl;
-        out <<"                     overallresult = False" << endl;
-        out << "" << endl;
-    }
-
-    if (script3 != "")
-    {
-        out << "            if (resultFromUser == 3):" << endl;
-        out <<"                proc = subprocess.Popen(\"" << fullFN3 << "\",shell=True, stderr=subprocess.PIPE)" << endl;
-        out <<"                return_code = proc.wait()" << endl;
-        out <<"                for line in proc.stderr:" << endl;
-        out <<"                  if (line.rstrip() == \"Failure\"):" << endl;
-        out <<"                     overallresult = False" << endl;
-        out << "" << endl;
-    }
-
-    if (script4 != "")
-    {
-        out << "            if (resultFromUser == 4):" << endl;
-        out <<"                proc = subprocess.Popen(\"" << fullFN4 << "\",shell=True, stderr=subprocess.PIPE)" << endl;
-        out <<"                return_code = proc.wait()" << endl;
-        out <<"                for line in proc.stderr:" << endl;
-        out <<"                  if (line.rstrip() == \"Failure\"):" << endl;
-        out <<"                     overallresult = False" << endl;
-        out << "" << endl;
-    }
-
-    out << "         except MySQLdb.Error, e:" << endl;
-    out << "            rospy.loginfo(\"Error %d: %s\" % (e.args[0],e.args[1]))" << endl;
-    out << "            sys.exit(1)" << endl;
-
-    mainCall:
-
-// Main call
-
-    out << "#--------------------------------------------------------------------------------" << endl;
-    out << "if __name__ == \"__main__\":" << endl;
-    out << "   SCRIPT = "<< sequenceName << "()" << endl;
-    out << "   SCRIPT.Start()" << endl;
-
-
-    out << "#--------------------------------------------------------------------------------" << endl;
-
-
-
-}
-
-void MainWindow::on_QBpushButton_clicked()
-{
-
-    QString sequenceName = ui->SeqComboBox->currentText();
-    QSqlQuery query;
-    QSqlQuery queryLogic;
-
-    query.clear();
-
-    query.prepare("SELECT * FROM  ActionRules WHERE name = :name ORDER BY ruleOrder");
-
-    query.bindValue(":name",sequenceName );
-
-    if (!query.exec())
-    {
-        qDebug() << "Can't select from actionrules table!" << query.executedQuery();
-        return;
-    }
-
-
-    QString prevANDORSwitch = "undefined";
-    QString ANDORSwitch;
-
-    int recCount=0;
-    bool overallresult, result;
-
-    while(query.next())
-    {
-         if (query.value(2).toString() != "R")
-         {
-             return;
-         }
-
-         recCount++;
-
-         qDebug()<<query.value(4).toString()<<"  "<<query.value(6).toString();
-
-         QString ANDORSwitch = "undefined";
-
-         if (query.value(4).toInt() == 1)
-         {
-            ANDORSwitch = "AND";
-         }
-
-         if (query.value(4).toInt() == 2)
-         {
-            ANDORSwitch = "OR";
-         }
-
-         queryLogic.clear();
-
-         queryLogic.prepare(query.value(6).toString());
-
-         if (!queryLogic.exec())
-         {
-             qDebug() << "Can't execute rule from actionrules table!" << queryLogic.executedQuery();
-             return;
-         }
-
-         if(queryLogic.size()==1)
-         {
-             result = true;
-             qDebug()<<" <-- true";
-         }
-         else
-         {
-             result = false;
-             qDebug()<<" <-- false";
-         }
-
-         if (recCount == 1)             // first record
-         {
-            overallresult = result;
-            prevANDORSwitch = ANDORSwitch;
-
-         }
-         else
-         {
-             if (prevANDORSwitch == "OR")
-             {
-                 overallresult = overallresult || result;
-             }
-
-             if (prevANDORSwitch == "AND")
-             {
-                 overallresult = overallresult && result;
-             }
-
-             if (prevANDORSwitch == "undefined")
-             {
-                 overallresult = overallresult && result;
-             }
-             prevANDORSwitch = ANDORSwitch;
-
-         }
-
-     }
-
-     if (overallresult)
-     {
-        qDebug()<<"Rule is valid!";
-     }
-     else
-     {
-        qDebug()<<"Rule is invalid!";
-     }
-
-
-}
 
 
 void MainWindow::on_BigCupboardDoorBottomCheckBox_toggled(bool checked)
@@ -5058,7 +4435,7 @@ void MainWindow::on_condAddRuleButton_clicked()
 
     QSqlQuery query;
 
-    query.prepare("SELECT MAX(sensorId) FROM Sensors where sensorId >499 and sensorId < 600 ");
+    query.prepare("SELECT MAX(sensorId) FROM Sensors where  >499 and sensorId < 600 ");
 
     if (!query.exec())
     {
@@ -5357,4 +4734,250 @@ void MainWindow::on_UHcupLevelCheckBox_toggled(bool checked)
         ruleCount--;
     }
 
+}
+
+void MainWindow::on_reOrderButton_clicked()
+{
+
+    QSqlQuery query;
+
+    QString sequenceName = ui->SeqComboBox->currentText();
+
+    query.prepare("SELECT * FROM ActionRules WHERE name = :name AND experimentalLocationId = :locn ORDER BY ruleOrder");
+    query.bindValue(":locn",experimentLocation);
+    query.bindValue(":name",sequenceName);
+
+    if (!query.exec())
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Critical);
+
+        msgBox.setText("Database error - can't select from ActionRule table!");
+        msgBox.exec();
+
+        qCritical("Cannot delete: %s (%s)",
+                  db.lastError().text().toLatin1().data(),
+                  qt_error_string().toLocal8Bit().data());
+        return;
+
+    }
+
+    int reOrderNumber = 0;
+
+    while (query.next())
+    {
+        QString rON;
+        rON.setNum(reOrderNumber);
+
+
+        QSqlQuery updQuery;
+
+        updQuery.prepare("UPDATE ActionRules SET ruleOrder = :newOrder WHERE name = :name AND experimentalLocationId = :locn and ruleOrder = :oldOrder");
+        updQuery.bindValue(":locn",experimentLocation);
+        updQuery.bindValue(":name",sequenceName);
+        updQuery.bindValue(":newOrder",rON);
+        updQuery.bindValue(":oldOrder",query.value(1));
+
+        updQuery.exec();
+
+        if (!updQuery.exec())
+        {
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+
+            msgBox.setText("Database error - can't update ActionRule table!");
+            msgBox.exec();
+
+            qCritical("Cannot delete: %s (%s)",
+                      db.lastError().text().toLatin1().data(),
+                      qt_error_string().toLocal8Bit().data());
+            return;
+
+        }
+
+        reOrderNumber++;
+    }
+
+    globalRuleCount = reOrderNumber;
+    globalActionCount = reOrderNumber;
+
+    fillActionRuleTable(sequenceName);
+
+    updateSequenceTable();
+
+}
+
+void MainWindow::on_updateOrderButton_clicked()
+{
+    QStringList list;
+    list = model.stringList();
+
+    int reOrderNumber = 1000;
+
+    QString sequenceName = ui->SeqComboBox->currentText();
+
+    QSqlQuery query;
+    QSqlQuery insQuery;
+
+    for (int i = 0; i < list.size(); ++i)
+    {
+        qDebug() << list.at(i).toLocal8Bit().constData() << endl;
+
+
+        QString ar = list.at(i).toLocal8Bit().constData();   // get the row on screen
+
+
+
+
+
+
+
+
+        QString rOrd = ar.section("::",1,1);
+
+        qDebug()<<sequenceName;
+        qDebug()<<rOrd;
+        qDebug()<<experimentLocation;
+
+        // get the db entry for that row
+
+        query.prepare("SELECT * FROM ActionRules WHERE name = :name AND experimentalLocationId = :locn and ruleOrder = :ruleOrder LIMIT 1");
+        query.bindValue(":locn",experimentLocation);
+        query.bindValue(":name",sequenceName);
+        query.bindValue(":ruleOrder",rOrd);     // the current index
+
+        if (!query.exec())
+        {
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+
+            msgBox.setText("Database error - can't select from ActionRule table!");
+            msgBox.exec();
+
+            qCritical("Cannot delete: %s (%s)",
+                      db.lastError().text().toLatin1().data(),
+                      qt_error_string().toLocal8Bit().data());
+            return;
+
+        }
+
+        query.next();
+
+
+        QString rON;
+        rON.setNum(reOrderNumber);
+
+        // insert row back to DB with sequetial order number (starting from 1000)
+
+        qDebug()<<rON;
+
+
+
+        insQuery.prepare("INSERT INTO ActionRules VALUES (:name, :ruleOrder, :ruleType, :notConnector, :andOrConnector, :ruleActiontext, :rule, :action, :ExpLocId)");
+        insQuery.bindValue(":name",query.value(0));
+        insQuery.bindValue(":ruleOrder",rON);
+        insQuery.bindValue(":ruleType",query.value(2));
+        insQuery.bindValue(":notConnector",query.value(3));
+        insQuery.bindValue(":andOrConnector",query.value(4));
+        insQuery.bindValue(":ruleActiontext",query.value(5));
+        insQuery.bindValue(":rule",query.value(6));
+        insQuery.bindValue(":action",query.value(7));
+        insQuery.bindValue(":ExpLocId",query.value(8));
+
+        insQuery.exec();
+
+        // increment new row count
+
+        reOrderNumber++;
+
+    }
+
+    // now delete all rows order number < 1000
+
+     QSqlQuery delQuery;
+
+     delQuery.prepare("DELETE FROM ActionRules WHERE name = :name AND experimentalLocationId = :locn and ruleOrder < 1000");
+     delQuery.bindValue(":locn",experimentLocation);
+     delQuery.bindValue(":name",sequenceName);
+
+     delQuery.exec();
+
+     on_reOrderButton_clicked();
+
+
+}
+
+void MainWindow::on_dropEvent(QDropEvent * e)
+{
+    qDebug()<<"Indexes moved";
+}
+
+
+
+void MainWindow::on_E125_SS1_CheckBox_toggled(bool checked)
+{
+   ui->E125_SS1_NotOccupied_RadioButton->setEnabled(checked);
+   ui->E125_SS1_Occupied_RadioButton->setEnabled(checked);
+   ui->E125_SS1_AND_RadioButton->setEnabled(checked);
+   ui->E125_SS1_OR_RadioButton->setEnabled(checked);
+
+   if (checked)
+   {
+      ruleCount++;
+   }
+   else
+   {
+      ruleCount--;
+   }
+ }
+
+void MainWindow::on_E125_SS2_CheckBox_toggled(bool checked)
+{
+    ui->E125_SS2_NotOccupied_RadioButton->setEnabled(checked);
+    ui->E125_SS2_Occupied_RadioButton->setEnabled(checked);
+    ui->E125_SS2_AND_RadioButton->setEnabled(checked);
+    ui->E125_SS2_OR_RadioButton->setEnabled(checked);
+
+    if (checked)
+    {
+       ruleCount++;
+    }
+    else
+    {
+       ruleCount--;
+    }
+}
+
+void MainWindow::on_E125_LS1_CheckBox_toggled(bool checked)
+{
+    ui->E125_LS1_NotOccupied_RadioButton->setEnabled(checked);
+    ui->E125_LS1_Occupied_RadioButton->setEnabled(checked);
+    ui->E125_LS1_AND_RadioButton->setEnabled(checked);
+    ui->E125_LS1_OR_RadioButton->setEnabled(checked);
+
+    if (checked)
+    {
+       ruleCount++;
+    }
+    else
+    {
+       ruleCount--;
+    }
+}
+
+void MainWindow::on_E125_LS2_CheckBox_toggled(bool checked)
+{
+    ui->E125_LS2_NotOccupied_RadioButton->setEnabled(checked);
+    ui->E125_LS2_Occupied_RadioButton->setEnabled(checked);
+    ui->E125_LS2_AND_RadioButton->setEnabled(checked);
+    ui->E125_LS2_OR_RadioButton->setEnabled(checked);
+
+    if (checked)
+    {
+       ruleCount++;
+    }
+    else
+    {
+       ruleCount--;
+    }
 }

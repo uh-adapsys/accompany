@@ -881,7 +881,7 @@ void MainWindow::on_speakLearnItPushButton_clicked()
 
    QString str = ui->speakLineEdit->text();
    str = str.simplified();
-   str.replace( " ", "" );
+ //  str.replace( " ", "" );
    str.replace( ",", " " );
 
    if (ui->speakKnowHowListView->currentIndex().row() == -1 && str=="")

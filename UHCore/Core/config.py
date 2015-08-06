@@ -69,7 +69,17 @@ locations_config = {
                                 'offset':(81, 245),
                                 'rotation':-90 
                             }
-                     }
+                     },
+  'STRI e125': {
+#                     'sensors': ['ZigBee', 'ZigBeeDirect'],
+                     'sensors': ['ZigBee'],
+                     'map': {
+                                'base':'RobotHouseMap.svg',
+                                'scale':0.275,
+                                'offset':(81, 245),
+                                'rotation':-90 
+                            }
+                     },
 }
 
 """ Controlls various magic strings that are specific to individulal robot models

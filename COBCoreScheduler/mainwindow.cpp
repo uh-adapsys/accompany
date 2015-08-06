@@ -107,6 +107,9 @@ void schedulerThread::run()
 
 schedulerThread* sched;
 Robot *robot;
+
+Robot *robotTest;
+
 ActionHistory *actionHistory;
 
 int rc;  // iteration count
@@ -332,7 +335,11 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
     {
         actionHistory = new ActionHistory(modulePath);
         // open up the python interface to the robot
+   //     robot = new Robot(modulePath, "Dummy"); //use the current robot specified in the sessioncontrol table
+   //     qDebug()<<"Hello";
         robot = new Robot(modulePath); //use the current robot specified in the sessioncontrol table
+
+
         if (robot->getName() == "")
         {
             // This appears to happen sometimes if the application has not completely loaded? before reaching this line
@@ -421,7 +428,7 @@ bool MainWindow::fillSequenceTable(QString scenario)
             "SELECT name, priority, IF(interruptable,'Yes','No')FROM Sequences WHERE schedulable = 1 and experimentalLocationId = "\
                 + houseLocation + " AND (scenario = 'User Generated' OR scenario = 'Operator' OR scenario = '"\
                 + scenario + "') ORDER BY schedulable DESC, priority DESC, RAND()";
-  //      qDebug()<<qry;
+        qDebug()<<qry;
         if (!query.exec(qry))
         {
             QMessageBox msgBox;
@@ -543,7 +550,7 @@ void MainWindow::on_sequenceTableWidget_cellClicked(int row, int column)
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Critical);
 
-        msgBox.setText("DB error -2- cannot select from ActionRules table!");
+        msgBox.setText("DB error - cannot select from ActionRules table!");
         msgBox.exec();
 
         QApplication::quit();
@@ -1034,10 +1041,6 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
 
     if (!query.exec())
     {
-        qDebug()<< query.lastError();
-        qDebug()<< query.lastQuery();
-        qDebug()<< query.executedQuery();
-
         returnResult = ACTIONRULES_DB_ERROR_SELECT;
         qDebug() << "Execute Sequence Name: " << sequenceName;
         qDebug() << query.lastError();
@@ -1089,10 +1092,10 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
 
         bool blocking = true;
 
-        // if (wait == "wait")
-        // {
-        //      blocking = true;
-        // }
+      //  if (wait == "wait")
+      //  {
+      //      blocking = true;
+      //  }
 
         string returnRes = "SUCCEEDED";
 
@@ -1868,7 +1871,7 @@ void MainWindow::checkExecutionResult()
 
     case ACTIONRULES_DB_ERROR_SELECT:
         msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setText("DB error -1- cannot select from ActionRules table!");
+        msgBox.setText("DB error - cannot select from ActionRules table!");
         msgBox.exec();
         break;
 

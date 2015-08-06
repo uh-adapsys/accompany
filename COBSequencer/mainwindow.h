@@ -78,8 +78,7 @@ private slots:
     void on_SmallCupboardDoorLeftCheckBox_toggled(bool checked);
     void on_BigCupboardDoorTopCheckBox_toggled(bool checked);
     void on_BigCupboardDoorBottomCheckBox_toggled(bool checked);
-    void on_QBpushButton_clicked();
-    void on_pythonCreatePushButton_clicked();
+
     void on_robotDelayCheckBox_toggled(bool checked);
     void on_actionSequenceCheckBox_toggled(bool checked);
     void on_robotSpeakCheckBox_toggled(bool checked);
@@ -145,6 +144,15 @@ private slots:
     void on_playSoundCheckBox_toggled(bool checked);
     void on_robotSaveMemoryCheckBox_toggled(bool checked);
     void on_UHcupLevelCheckBox_toggled(bool checked);
+    void on_reOrderButton_clicked();
+    void on_updateOrderButton_clicked();
+    void on_dropEvent(QDropEvent * e);
+
+
+    void on_E125_SS1_CheckBox_toggled(bool checked);
+    void on_E125_SS2_CheckBox_toggled(bool checked);
+    void on_E125_LS1_CheckBox_toggled(bool checked);
+    void on_E125_LS2_CheckBox_toggled(bool checked);
 };
 
 #endif // MAINWINDOW_H

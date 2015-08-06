@@ -224,7 +224,8 @@ class ROS(object):
                     rosEnv.update(ros_config['envVars'])
             else:
                 print >> sys.stderr, "Unable to read ros bash script, file not found: %s" % bashScript
-                
+                return {}
+
             ROS._envVars[version] = (diffEnv, rosEnv)
 
         if onlyDifferent:

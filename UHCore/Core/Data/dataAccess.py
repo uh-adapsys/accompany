@@ -634,8 +634,8 @@ class Sensors(object):
             sql += " AND `%s`.`name` like" % (self._sensorTable) + " %(name)s"
             args = {'name': sensorName}
         if onlyPhysical:
-            sql += " AND `%s`.`sensorId` < 500" % (self._sensorTable)
-            
+            sql += " AND `%s`.`ChannelDescriptor` != 'N/A' AND `%s`.`ChannelDescriptor` != ''" % (self._sensorTable, self._sensorTable)
+
         return self._sql.getData(sql, args)
 
     def saveSensorLog(self, sensorId, value, status, timestamp=None, room='', channel=''):
