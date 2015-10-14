@@ -169,6 +169,7 @@ void MainWindow::setup()
 
      ui->changePushButton->setEnabled(false);
      ui->delPushButton->setEnabled(false);
+     ui->pushButton->setEnabled(false);
 
 
     fillSensorComboBox();
@@ -274,12 +275,14 @@ void MainWindow::on_sensorComboBox_activated(const QString &arg1)
 {
     ui->changePushButton->setEnabled(true);
     ui->delPushButton->setEnabled(true);
+    ui->pushButton->setEnabled(true);
 
     if (arg1 == "New Sensor")
     {
         ui->addPushButton->setEnabled(true);
         ui->changePushButton->setEnabled(false);
         ui->delPushButton->setEnabled(false);
+        ui->pushButton->setEnabled(false);
         ui->idSpinBox->setEnabled(true);
         clearForm();
         return;
@@ -565,7 +568,7 @@ bool MainWindow::updateSensor()
         msgBox.setText("Database error - can't update Sensors table!");
         msgBox.exec();
 
-        qCritical("Cannot delete: %s (%s)",
+        qCritical("Cannot update: %s (%s)",
               db.lastError().text().toLatin1().data(),
               qt_error_string().toLocal8Bit().data());
         return false;
@@ -618,7 +621,7 @@ void MainWindow::on_delPushButton_clicked()
     }
 
 
-    fillSensorComboBox();
+ //   fillSensorComboBox();
     clearForm();
 
 }
@@ -698,8 +701,68 @@ void MainWindow::on_addPushButton_clicked()
 
         return;
     }
-/*
-    query.bindValue(":id",ui->sensorComboBox->currentText().section("::",1,1));
+
+    if (ui->valuePlainTextEdit->toPlainText().trimmed() == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+
+        msgBox.setText("You need to provide a value!");
+        msgBox.exec();
+
+        return;
+    }
+
+    if (ui->prevValuePlainTextEdit->toPlainText().trimmed() == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+
+        msgBox.setText("You need to provide a previous value!");
+        msgBox.exec();
+
+        return;
+    }
+
+    if (ui->channelPlainTextEdit->toPlainText().trimmed() == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+
+        msgBox.setText("You need to provide a channel descriptor!");
+        msgBox.exec();
+
+        return;
+    }
+
+    if (ui->statusPlainTextEdit->toPlainText().trimmed() == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+
+        msgBox.setText("You need to provide a current status!");
+        msgBox.exec();
+
+        return;
+    }
+
+    if (ui->prevStatusPlainTextEdit->toPlainText().trimmed() == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+
+        msgBox.setText("You need to provide a previous status!");
+        msgBox.exec();
+
+        return;
+    }
+
+
+    query.clear();
+    query.prepare("INSERT INTO Sensors VALUES (:sensorId,:value,:locationId,:name,:sensorAccessPointID,:sensorRule,:ChannelDescriptor,:sensorTypeId,:lastUpdate,:lastTimeActive,:lastActiveValue,:status,:lastStatus,:xCoord,:yCoord,:orientation,:icon)");
+    QString id;
+    id.setNum(ui->idSpinBox->value());
+    query.bindValue(":sensorId",id);
     query.bindValue(":locationId",ui->locnComboBox->currentText().section("::",1,1));
     query.bindValue(":value",ui->valuePlainTextEdit->toPlainText().trimmed());
     query.bindValue(":lastActiveValue",ui->prevValuePlainTextEdit->toPlainText().trimmed());
@@ -717,5 +780,19 @@ void MainWindow::on_addPushButton_clicked()
     query.bindValue(":orientation",ui->oSpinBox->value());
     query.bindValue(":icon",ui->ispinBox->value());
 
-    */
+    if (!query.exec())
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Critical);
+
+        msgBox.setText("Database error - can't insert to Sensors table!");
+        msgBox.exec();
+
+        qCritical("Cannot add: %s (%s)",
+              db.lastError().text().toLatin1().data(),
+              qt_error_string().toLocal8Bit().data());
+        return;
+    }
+
+    clearForm();
 }
