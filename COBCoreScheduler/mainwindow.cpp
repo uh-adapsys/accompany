@@ -1490,6 +1490,7 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
                 }
 
                 GUIquery.next();
+               // qDebug()<<"size:"<<GUIquery.size();
                 QString resultFromUser = GUIquery.value(0).toString();
 
                 //     qDebug()<<resultFromUser;
@@ -1520,11 +1521,11 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
             Goalquery.bindValue(":value", pname1);
             Goalquery.bindValue(":goalId", pname);
 
-            QString TF = "true";
+            QString TF = "True";
 
             if (pname1 == "0")
             {
-                TF = "false";
+                TF = "False";
             }
 
             Goalquery.bindValue(":truefalse", TF);
