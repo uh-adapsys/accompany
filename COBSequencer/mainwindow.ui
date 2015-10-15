@@ -450,7 +450,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>9</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="tabDining">
       <attribute name="title">
@@ -1289,8 +1289,8 @@
       <widget class="QGroupBox" name="groupBox">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>10</y>
+         <x>20</x>
+         <y>0</y>
          <width>591</width>
          <height>31</height>
         </rect>
@@ -1381,7 +1381,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>180</y>
+         <y>200</y>
          <width>581</width>
          <height>41</height>
         </rect>
@@ -1441,35 +1441,51 @@
          </property>
         </widget>
        </widget>
-       <widget class="QLabel" name="label_7">
+       <widget class="QGroupBox" name="groupBox_119">
         <property name="geometry">
          <rect>
-          <x>220</x>
-          <y>20</y>
-          <width>101</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Wattage&gt;</string>
-        </property>
-       </widget>
-       <widget class="QSpinBox" name="TVSpinBox">
-        <property name="geometry">
-         <rect>
-          <x>310</x>
-          <y>10</y>
-          <width>58</width>
+          <x>200</x>
+          <y>0</y>
+          <width>121</width>
           <height>31</height>
          </rect>
         </property>
+        <property name="title">
+         <string/>
+        </property>
+        <widget class="QRadioButton" name="TVOnRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>61</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>On</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="TVOffRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>10</y>
+           <width>61</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Off</string>
+         </property>
+        </widget>
        </widget>
       </widget>
       <widget class="QGroupBox" name="groupBox_17">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>40</y>
+         <x>20</x>
+         <y>30</y>
          <width>591</width>
          <height>31</height>
         </rect>
@@ -1559,8 +1575,8 @@
       <widget class="QGroupBox" name="groupBox_28">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>70</y>
+         <x>20</x>
+         <y>60</y>
          <width>591</width>
          <height>31</height>
         </rect>
@@ -1650,8 +1666,8 @@
       <widget class="QGroupBox" name="groupBox_31">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>100</y>
+         <x>20</x>
+         <y>90</y>
          <width>591</width>
          <height>31</height>
         </rect>
@@ -1741,8 +1757,8 @@
       <widget class="QGroupBox" name="groupBox_34">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>130</y>
+         <x>20</x>
+         <y>120</y>
          <width>591</width>
          <height>31</height>
         </rect>
@@ -1815,6 +1831,97 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="LRS5ORRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>70</x>
+           <y>0</y>
+           <width>61</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Or</string>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_117">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>160</y>
+         <width>591</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QRadioButton" name="LRDOpenRadioButton">
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>10</y>
+          <width>99</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Open</string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="LRDClosedRadioButton">
+        <property name="geometry">
+         <rect>
+          <x>310</x>
+          <y>10</y>
+          <width>131</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Closed</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="LRDCheckBox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>191</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Living Room Door</string>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="groupBox_118">
+        <property name="geometry">
+         <rect>
+          <x>450</x>
+          <y>10</y>
+          <width>121</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <widget class="QRadioButton" name="LRDANDRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>0</y>
+           <width>61</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>And</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="LRDORRadioButton">
          <property name="geometry">
           <rect>
            <x>70</x>
@@ -3317,7 +3424,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>90</y>
+         <y>20</y>
          <width>591</width>
          <height>41</height>
         </rect>
@@ -3421,7 +3528,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>140</y>
+         <y>80</y>
          <width>591</width>
          <height>31</height>
         </rect>
@@ -3517,6 +3624,97 @@
          </property>
          <property name="text">
           <string>Empty</string>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_230">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>120</y>
+         <width>591</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string/>
+       </property>
+       <widget class="QRadioButton" name="BRDOpenRadioButton">
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>10</y>
+          <width>99</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Open</string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="BRDClosedRadioButton">
+        <property name="geometry">
+         <rect>
+          <x>310</x>
+          <y>10</y>
+          <width>131</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Closed</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="BRDCheckBox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>191</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string> Bathroom Door</string>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="groupBox_231">
+        <property name="geometry">
+         <rect>
+          <x>450</x>
+          <y>10</y>
+          <width>121</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <widget class="QRadioButton" name="BRDANDRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>0</y>
+           <width>61</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>And</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="BRDORRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>70</x>
+           <y>0</y>
+           <width>61</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Or</string>
          </property>
         </widget>
        </widget>
@@ -5738,7 +5936,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QTabWidget" name="SiennaGUI">
+    <widget class="QTabWidget" name="RoomBa">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -7198,6 +7396,191 @@
         <property name="text">
          <string>Action Possibility</string>
         </property>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_18">
+      <attribute name="title">
+       <string>RoomBa</string>
+      </attribute>
+      <widget class="QGroupBox" name="robotTorsoGroupBox_5">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>20</y>
+         <width>311</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <widget class="QCheckBox" name="robotTorsoCheckBox_4">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>131</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Activate</string>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="TorsoGroupBox_5">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>0</y>
+          <width>141</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <widget class="QGroupBox" name="TorsoBFGroupBox_4">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>131</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="title">
+          <string/>
+         </property>
+         <widget class="QRadioButton" name="torsoLookBackRadioButton_4">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>61</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>On</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QRadioButton" name="torsoLookForwardRadioButton_4">
+          <property name="geometry">
+           <rect>
+            <x>70</x>
+            <y>10</y>
+            <width>61</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Off</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="robotTorsoGroupBox_6">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>80</y>
+         <width>311</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <widget class="QCheckBox" name="robotTorsoCheckBox_5">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>131</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Cleaning</string>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="TorsoGroupBox_6">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>0</y>
+          <width>141</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <widget class="QGroupBox" name="TorsoBFGroupBox_5">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>131</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="title">
+          <string/>
+         </property>
+         <widget class="QRadioButton" name="torsoLookBackRadioButton_5">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>61</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Start</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QRadioButton" name="torsoLookForwardRadioButton_5">
+          <property name="geometry">
+           <rect>
+            <x>70</x>
+            <y>10</y>
+            <width>61</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Stop</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </widget>
        </widget>
       </widget>
      </widget>

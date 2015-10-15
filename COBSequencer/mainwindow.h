@@ -153,6 +153,8 @@ private slots:
     void on_E125_SS2_CheckBox_toggled(bool checked);
     void on_E125_LS1_CheckBox_toggled(bool checked);
     void on_E125_LS2_CheckBox_toggled(bool checked);
+    void on_LRDCheckBox_toggled(bool checked);
+    void on_BRDCheckBox_toggled(bool checked);
 };
 
 #endif // MAINWINDOW_H

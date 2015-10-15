@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtWidgets>
+#include <QtGui>
 #include "locn.h"
 #include <QtSql>
 #include "newlocation.h"

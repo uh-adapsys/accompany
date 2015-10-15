@@ -33,6 +33,7 @@ int andCount;
 int experimentLocation;   // 1 = UH, 2=ZUYD, 3=Madopa
 int defaultUserId;
 int activeRobot;
+QString sType;
 
 QStringListModel model;
 
@@ -69,6 +70,13 @@ void MainWindow::setup()
     {
        QString line = in.readLine();
 
+       // deal with comments
+
+       if (line.contains("#"))
+       {
+           line = line.section("#",0,0); // everything after and inc the # is ignored
+       }
+
        if (line.contains("mysql_log_user"))
        {
           user = line.section("'",3,3);
@@ -85,6 +93,12 @@ void MainWindow::setup()
        {
           dBase = line.section("'",3,3);
        }
+
+       if (line.contains("scenario_type"))
+       {
+          sType = line.section("'",3,3);
+       }
+
     }
 
     user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
@@ -119,6 +133,8 @@ void MainWindow::setup()
       closeDownRequest = true;
       return;
     };
+
+
 
 
 
@@ -230,7 +246,7 @@ void MainWindow::on_specUserLocationButton_clicked()
 
    if (experimentLocation == 1)
    {
-       locQuery += " AND (L1.locationId < 500 OR L1.locationId = 999) ORDER BY L1.locationId";
+       locQuery += " AND (L1.locationId < 300 OR L1.locationId = 999) ORDER BY L1.locationId";
    }
 
     if (experimentLocation == 2)
@@ -243,7 +259,12 @@ void MainWindow::on_specUserLocationButton_clicked()
         locQuery += " AND ((L1.locationId > 699 AND L1.locationId < 800) or L1.locationId = 999) ORDER BY L1.locationId";
     }
 
-//    qDebug() << locQuery;
+    if (experimentLocation == 6)
+    {
+      locQuery += " AND ((L1.locationId > 299 AND L1.locationId < 400) or L1.locationId = 999) ORDER BY L1.locationId";
+    }
+
+ //   qDebug() << locQuery;
 
     QSqlQuery query(locQuery);
 
@@ -333,7 +354,7 @@ void MainWindow::on_robotLocationSpecButton_clicked()
 
     if (experimentLocation == 1)
     {
-        locQuery += " AND (L1.locationId < 500 OR L1.locationId = 999 OR L1.locationId = 911) ORDER BY L1.locationId";
+        locQuery += " AND (L1.locationId < 300 OR L1.locationId = 999 OR L1.locationId = 911) ORDER BY L1.locationId";
     }
 
      if (experimentLocation == 2)
@@ -345,6 +366,12 @@ void MainWindow::on_robotLocationSpecButton_clicked()
      {
          locQuery += " AND ((L1.locationId > 699 AND L1.locationId < 800) OR L1.locationId = 999 OR L1.locationId = 911) ORDER BY L1.locationId";
      }
+
+    if (experimentLocation == 6)
+    {
+       locQuery += " AND ((L1.locationId > 299 AND L1.locationId < 400) or L1.locationId = 999) ORDER BY L1.locationId";
+    }
+
     QSqlQuery query(locQuery);
 
     ui->robotLocationComboBox->clear();
@@ -514,6 +541,19 @@ void MainWindow::on_selectSensorsButton_clicked()
             ui->sensorTab->setTabEnabled(6,false);
         }
 
+        if (experimentLocation == 6)         // turn off UH and HUYT
+        {
+            ui->sensorTab->setTabEnabled(8,false);
+
+            ui->sensorTab->setTabEnabled(0,false);
+            ui->sensorTab->setTabEnabled(1,false);
+            ui->sensorTab->setTabEnabled(2,false);
+            ui->sensorTab->setTabEnabled(3,false);
+            ui->sensorTab->setTabEnabled(4,false);
+            ui->sensorTab->setTabEnabled(5,false);
+            ui->sensorTab->setTabEnabled(6,false);
+        }
+
 }
 
 
@@ -571,6 +611,10 @@ void MainWindow::on_SeqComboBox_editTextChanged(QString )
 
 void MainWindow::on_seqAddButton_clicked()
 {
+
+
+
+
     QString str = ui->SeqComboBox->currentText();
 
     str = str.simplified();
@@ -586,7 +630,26 @@ void MainWindow::on_seqAddButton_clicked()
         return;
     }
 
+    if (ui->seqDescLineEdit->text() == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Critical);
 
+        msgBox.setText("You need to describe this sequence!");
+        msgBox.exec();
+        return;
+
+    }
+
+    if (ui->seqTypeComboBox->currentText() == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Critical);
+
+        msgBox.setText("You need to chose a scenario for this sequence!");
+        msgBox.exec();
+        return;
+    }
 
     // for add's we reset the rule and action count to 0
 
@@ -604,6 +667,10 @@ void MainWindow::on_seqAddButton_clicked()
     query.bindValue(":scen",ui->seqTypeComboBox->currentText());
     query.bindValue(":scendesc",ui->seqDescLineEdit->text());
     query.bindValue(":locn",experimentLocation);
+
+
+
+
 
 
     if (!query.exec())
@@ -943,6 +1010,7 @@ void MainWindow::fillActionRuleTable(QString seqName)
    ui->addActionButton->setEnabled(true);
 
 
+
 }
 
 void MainWindow::on_addRuleButton_clicked()
@@ -1248,11 +1316,19 @@ void MainWindow::on_addRuleButton_clicked()
                            ui->LRS5ANDRadioButton->isChecked(),
                            ui->LRS5ORRadioButton->isChecked());
 
+       fillRuleActionTable("Living Room Door",
+                           23,
+                           "open:closed",
+                           ui->LRDCheckBox->isChecked(),
+                           ui->LRDOpenRadioButton->isChecked(),
+                           ui->LRDANDRadioButton->isChecked(),
+                           ui->LRDORRadioButton->isChecked());
+
        fillRuleActionTable("Television",
                           49,
-                         "Wattage",
+                          "On:Off",
                           ui->TVcheckBox->isChecked(),
-                          ui->TVSpinBox->value(),
+                          ui->TVOnRadioButton->isChecked(),
                           ui->TVANDRadioButton->isChecked(),
                           ui->TVORRadioButton->isChecked());
 
@@ -1405,6 +1481,16 @@ void MainWindow::on_addRuleButton_clicked()
                                ui->UHcupLevelANDRadioButton->isChecked(),
                                ui->UHcupLevelORRadioButton->isChecked());
 
+           fillRuleActionTable("Bathroom Door",
+                               13,
+                               "open:closed",
+                               ui->BRDCheckBox->isChecked(),
+                               ui->BRDOpenRadioButton->isChecked(),
+                               ui->BRDANDRadioButton->isChecked(),
+                               ui->BRDORRadioButton->isChecked());
+
+
+
 
 
     // ZUYD Sensors
@@ -1464,33 +1550,33 @@ void MainWindow::on_addRuleButton_clicked()
 
                   fillRuleActionTable("E125 Small Sofa 1 seat 1",
                                       2001,
-                                     "occupied:unoccupied",
+                                     "unoccupied:occupied",
                                      ui->E125_SS1_CheckBox->isChecked(),
-                                     ui->E125_SS1_Occupied_RadioButton->isChecked(),
+                                     !ui->E125_SS1_Occupied_RadioButton->isChecked(),
                                      ui->E125_SS1_AND_RadioButton->isChecked(),
                                      ui->E125_SS1_OR_RadioButton->isChecked());
 
                   fillRuleActionTable("E125 Small Sofa 2 seat 1",
                                       2006,
-                                     "occupied:unoccupied",
+                                     "unoccupied:occupied",
                                      ui->E125_SS2_CheckBox->isChecked(),
-                                     ui->E125_SS2_Occupied_RadioButton->isChecked(),
+                                     !ui->E125_SS2_Occupied_RadioButton->isChecked(),
                                      ui->E125_SS2_AND_RadioButton->isChecked(),
                                      ui->E125_SS2_OR_RadioButton->isChecked());
 
                   fillRuleActionTable("E125 Long Sofa  seat 1",
                                       2002,
-                                     "occupied:unoccupied",
+                                     "unoccupied:occupied",
                                      ui->E125_LS1_CheckBox->isChecked(),
-                                     ui->E125_LS1_Occupied_RadioButton->isChecked(),
+                                     !ui->E125_LS1_Occupied_RadioButton->isChecked(),
                                      ui->E125_LS1_AND_RadioButton->isChecked(),
                                      ui->E125_LS1_OR_RadioButton->isChecked());
 
                   fillRuleActionTable("E125 Long Sofa  seat 2",
                                       2003,
-                                     "occupied:unoccupied",
+                                     "unoccupied:occupied",
                                      ui->E125_LS2_CheckBox->isChecked(),
-                                     ui->E125_LS2_Occupied_RadioButton->isChecked(),
+                                     !ui->E125_LS2_Occupied_RadioButton->isChecked(),
                                      ui->E125_LS2_AND_RadioButton->isChecked(),
                                      ui->E125_LS2_OR_RadioButton->isChecked());
     //---------------------------------------------------------------
@@ -1834,7 +1920,8 @@ void MainWindow::on_livingSofa5CheckBox_toggled(bool checked)
 void MainWindow::on_TVcheckBox_toggled(bool checked)
 {
 
-    ui->TVSpinBox->setEnabled(checked);
+    ui->TVOnRadioButton->setEnabled(checked);
+    ui->TVOffRadioButton->setEnabled(checked);
     ui->TVANDRadioButton->setEnabled(checked);
     ui->TVORRadioButton->setEnabled(checked);
 
@@ -3370,6 +3457,16 @@ void MainWindow::resetGui()
     ui->LRS5ANDRadioButton->setChecked(true);
     ui->LRS5ORRadioButton->setEnabled(false);
 
+    ui->LRDOpenRadioButton->setEnabled(false);
+    ui->LRDClosedRadioButton->setEnabled(false);
+    ui->LRDOpenRadioButton->setChecked(true);
+
+    ui->LRDANDRadioButton->setEnabled(false);
+    ui->LRDANDRadioButton->setChecked(true);
+    ui->LRDORRadioButton->setEnabled(false);
+
+
+
 
     ui->KCDLOpenRadioButton->setEnabled(false);
     ui->KCDLClosedRadioButton->setEnabled(false);
@@ -3438,10 +3535,13 @@ void MainWindow::resetGui()
     ui->KFDoorRANDRadioButton->setChecked(true);
     ui->KFDoorRORRadioButton->setEnabled(false);
 
-    ui->TVSpinBox->setEnabled(false);
+    ui->TVOffRadioButton->setEnabled(false);
+    ui->TVOnRadioButton->setEnabled(false);
+    ui->TVOffRadioButton->setChecked(true);
     ui->TVANDRadioButton->setEnabled(false);
     ui->TVANDRadioButton->setChecked(true);
     ui->TVORRadioButton->setEnabled(false);
+
 
     ui->microwaveSpinBox->setEnabled(false);
     ui->microwaveANDRadioButton->setEnabled(false);
@@ -3528,6 +3628,14 @@ void MainWindow::resetGui()
     ui->UHcupLevelORRadioButton->setEnabled(false);
     ui->UHcupLevelANDRadioButton->setChecked(true);
     ui->UHCupEmptyRadioButton->setChecked(true);
+
+    ui->BRDOpenRadioButton->setEnabled(false);
+    ui->BRDClosedRadioButton->setEnabled(false);
+    ui->BRDOpenRadioButton->setChecked(true);
+
+    ui->BRDANDRadioButton->setEnabled(false);
+    ui->BRDANDRadioButton->setChecked(true);
+    ui->BRDORRadioButton->setEnabled(false);
 
 
     // ZUYD Sensors
@@ -3620,8 +3728,17 @@ void MainWindow::resetGui()
     // end E125 Sensors
 
     query.clear();
+          qDebug()<<sType;
+    if (sType == "")
+    {
+        query.prepare("SELECT * FROM Sequences WHERE experimentalLocationId = :locn order by name");
+    }
+    else
+    {
+        query.prepare("SELECT * FROM Sequences WHERE scenario = :sType AND experimentalLocationId = :locn order by name");
+        query.bindValue(":sType",sType);
+    }
 
-    query.prepare("SELECT * FROM Sequences WHERE experimentalLocationId = :locn order by name");
     query.bindValue(":locn",experimentLocation);
 
     query.exec();
@@ -3648,6 +3765,8 @@ void MainWindow::resetGui()
       {
           ui->seqTypeComboBox->addItem(query.value(0).toString());
       }
+      ui->seqTypeComboBox->setCurrentIndex(ui->seqTypeComboBox->findText(sType));
+
 
 
 
@@ -4435,7 +4554,7 @@ void MainWindow::on_condAddRuleButton_clicked()
 
     QSqlQuery query;
 
-    query.prepare("SELECT MAX(sensorId) FROM Sensors where  >499 and sensorId < 600 ");
+    query.prepare("SELECT MAX(sensorId) FROM Sensors where sensorId > 499 and sensorId < 600 ");
 
     if (!query.exec())
     {
@@ -4971,6 +5090,40 @@ void MainWindow::on_E125_LS2_CheckBox_toggled(bool checked)
     ui->E125_LS2_Occupied_RadioButton->setEnabled(checked);
     ui->E125_LS2_AND_RadioButton->setEnabled(checked);
     ui->E125_LS2_OR_RadioButton->setEnabled(checked);
+
+    if (checked)
+    {
+       ruleCount++;
+    }
+    else
+    {
+       ruleCount--;
+    }
+}
+
+void MainWindow::on_LRDCheckBox_toggled(bool checked)
+{
+    ui->LRDOpenRadioButton->setEnabled(checked);
+    ui->LRDClosedRadioButton->setEnabled(checked);
+    ui->LRDANDRadioButton->setEnabled(checked);
+    ui->LRDORRadioButton->setEnabled(checked);
+
+    if (checked)
+    {
+       ruleCount++;
+    }
+    else
+    {
+       ruleCount--;
+    }
+}
+
+void MainWindow::on_BRDCheckBox_toggled(bool checked)
+{
+    ui->BRDOpenRadioButton->setEnabled(checked);
+    ui->BRDClosedRadioButton->setEnabled(checked);
+    ui->BRDANDRadioButton->setEnabled(checked);
+    ui->BRDORRadioButton->setEnabled(checked);
 
     if (checked)
     {
