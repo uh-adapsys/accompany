@@ -125,6 +125,8 @@ class FullActionList(object):
                 ap.likelihood,\
                 ap.apId,\
                 ap.precondId as precond_id,\
+                ap.x as x,\
+                ap.y as y\
                 l.name as location_name\
             FROM\
                 SessionControl s\

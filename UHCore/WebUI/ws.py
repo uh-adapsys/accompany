@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #Add project reference
 import sys, os
 path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../' + 'Core')

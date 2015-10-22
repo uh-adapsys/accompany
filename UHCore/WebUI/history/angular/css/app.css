@@ -6,7 +6,7 @@ body {
   list-style: none;
 }
 
-.thumb {
+.thumb > img {
   float: left;
   margin: -1em 1em 1.5em 0em;
   padding-bottom: 1em;
@@ -16,19 +16,23 @@ body {
 
 .episodes li {
   clear: both;
-  height: 100px;
+  height: 135px;
   padding-top: 15px;
 }
 
-
+.narrative{
+  width: 176px;
+  height: 40px;
+  float: left;
+}
 
 .inner {
-    outline: solid 1px;
+    /*outline: solid 1px;*/
     float: left; 
-    width: 180px; 
-    height: 140px; 
-    margin: 10px; 
-    
+    width: 220px; 
+    height: 200px; 
+    padding-top: 2px;
+    margin: 2px; 
 }
 
 
@@ -41,3 +45,4 @@ body {
 .clearfix:after {
     clear: both;
 }
+

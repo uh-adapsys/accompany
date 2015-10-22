@@ -75,11 +75,12 @@ class ActionHistory(object):
         dao = DataAccess()
         dateNow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         location = dao.getRobotByName(cob.name)['locationId']
-        
-        historyId = dao.saveHistory(dateNow, ruleName, location)
+        user = self._dao.users.getActiveUser['userId']
+
+        historyId = dao.saveHistoryComplete(dateNow, ruleName, location, user)
         
         if(historyId > 0):
-            dao.saveSensorHistory(historyId)
+            #dao.saveSensorHistory(historyId)
 
             if imageType == None:
                 imageType = ActionHistory._defaultImageType
@@ -158,7 +159,8 @@ class SensorLog(PollingProcessor):
                                                   sensor['room'],
                                                   sensor['channel'])
                 if success:
-                    print "Updated sensor log for %(id)s to %(status)s (%(value)s)" % { 
+                    print "%(time)s: Updated sensor log for %(id)s to %(status)s (%(value)s)" % { 
+                                                                           'time':timestamp,
                                                                            'id':sensor['channel'],
                                                                            'status': status,
                                                                            'value': val,
@@ -170,3 +172,4 @@ if __name__ == '__main__':
     import sys
     print >> sys.stderr, "Sensor update code has moved to sensor.py"
     print >> sys.stderr, "Run 'python sensors.py' to begin monitoring sensors"
+

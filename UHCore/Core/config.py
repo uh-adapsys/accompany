@@ -14,6 +14,7 @@ server_config = {
   'mysql_log_table':    'SensorLog',
   
   'mysql_history_table':'ActionHistory',
+  'mysql_scenario_table':'Scenarios',
   'mysql_sensorHistory_table':'SensorHistory',
   'mysql_sensorType_table':'SensorType',
   'mysql_sensor_table':'Sensors',
