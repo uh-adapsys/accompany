@@ -133,6 +133,7 @@ robot_config = {
                                                 'positions': {
                                                               'raised': 'deliverup',
                                                               'lowered': 'storetray',
+							      'intermediate': [[0.0, 1.57, -2.36]],
                                                               },
                                                 'size' : 10
                                             },

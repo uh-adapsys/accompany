@@ -30,7 +30,7 @@ class MapProcessor(object):
         
         return copy.deepcopy(MapProcessor._mapCache[self._baseFile])
     
-    def getIcon(self, iconId, sensorOn=False):
+    def getIcon(self, iconId, text=None, sensorOn=False):
         """ Returns the sensor icon (with option 'On' graphic') wrapped in a group node """
         """ Caches icon for fast access in subsequent calls """
         key = str(iconId) + str(sensorOn)
@@ -66,7 +66,7 @@ class MapProcessor(object):
                         print "Unable to load image for %(type)s, using default" % {'type': imgName }
                     imgPath = 'icons/default.svg'
                     imgFile = et.parse(os.path.join(self._root, imgPath))
-                    imgFile.find('{http://www.w3.org/2000/svg}text').text = imgName            
+                    imgFile.find('{http://www.w3.org/2000/svg}text').text = text or imgName or imgPath
                 
                 if sys.version_info >= (2, 7):
                     group = et.Element('g')
@@ -109,7 +109,7 @@ class MapProcessor(object):
             except:
                 state = False
             (x, y, d) = cc.toSensorMap((element['xCoord'], element['yCoord'], element['orientation']))
-            (img, height, width) = self.getIcon(element['icon'], state)
+            (img, height, width) = self.getIcon(element['icon'], element['name'], state)
 
             # y is reversed for translation, seems that way at least
             My = mapHeight - y
@@ -125,6 +125,7 @@ class MapProcessor(object):
 
             img.attrib['transform'] = transform
             img.attrib['id'] = str(element['id'])
+            img.attrib['name'] = str(element['name'])
             root.append(img)
          
         # ElementTree.write() doesn't write the headers

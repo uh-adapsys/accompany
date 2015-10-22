@@ -51,7 +51,7 @@ class ROSLocationProcessor(PollingProcessor):
         sensors = {}
         for sensor in sensorData:
             sensors[sensor['sensorId']] = {
-                'id': sensor['locationId'],
+                'id': sensor['sensorId'],
                 'text': sensor['name'] or '',
                 'position': {'x': sensor['xCoord'] or 0, 'y': sensor['yCoord'] or 0},
                 'orientation': {'theta': math.radians(sensor['orientation'] or 0)},

@@ -84,6 +84,7 @@ class StateResolver(object):
             state = {
                       'id': sensor['sensorId'],
                       'value': sensor['value'],
+                      'name': sensor['name'],
                       'on': isOn,
                       'state': disp,
                       'xCoord': sensor['xCoord'],

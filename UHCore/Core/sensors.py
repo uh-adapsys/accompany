@@ -102,10 +102,11 @@ class ZWaveHomeController(PollingProcessor):
                 if channelDescriptor not in self._warned:
                     print "Warning: Unable to locate sensor record for ZWave sensor ID: %s (%s)" % (str(channelDescriptor), str(device['name']))
                     self._warned.append(channelDescriptor)
-                elif sensor['ChannelDescriptor'] not in self._connected:
-                    print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
-                    self._connected.append(sensor['ChannelDescriptor'])
                 continue
+
+            if sensor['ChannelDescriptor'] not in self._connected:
+                print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+                self._connected.append(sensor['ChannelDescriptor'])
     
             _device = sensor['locationName']
             _pin = sensor['name']
@@ -211,10 +212,11 @@ class ZWaveVeraLite(PollingProcessor):
                 if channelDescriptor not in self._warned:
                     print "Warning: Unable to locate sensor record for ZWave sensor ID: %s (%s)" % (str(channelDescriptor), str(device['name']))
                     self._warned.append(channelDescriptor)
-                elif sensor['ChannelDescriptor'] not in self._connected:
-                    print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
-                    self._connected.append(sensor['ChannelDescriptor'])
                 continue
+
+            if sensor['ChannelDescriptor'] not in self._connected:
+                print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+                self._connected.append(sensor['ChannelDescriptor'])
     
             _device = sensor['locationName']
             _pin = sensor['name']
@@ -319,10 +321,10 @@ class ZigBeeDirect(PollingProcessor):
                     if str(mac) + str(channel) not in self._warned:
                         print "Warning: Unable to locate sensor record for ZigBee sensor ID: %s" % (str(mac) + str(channel))
                         self._warned.append(str(mac) + str(channel))
-                    elif sensor['ChannelDescriptor'] not in self._connected:
-                        print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
-                        self._connected.append(sensor['ChannelDescriptor'])
                     continue
+                if sensor['ChannelDescriptor'] not in self._connected:
+                    print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+                    self._connected.append(sensor['ChannelDescriptor'])
                     
                 _device = sensor['locationName']
                 _pin = sensor['name']
@@ -410,11 +412,12 @@ class ZigBee(PollingProcessor):
             if str(mac) + str(channel) not in self._warned:
                 print "Warning: Unable to locate sensor record for ZigBee sensor ID: %s" % (str(mac) + str(channel))
                 self._warned.append(str(mac) + str(channel))
-            elif sensor['ChannelDescriptor'] not in self._connected:
-                print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
-                self._connected.append(sensor['ChannelDescriptor'])
             return
 
+        if sensor['ChannelDescriptor'] not in self._connected:
+            print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+            self._connected.append(sensor['ChannelDescriptor'])
+            
         _device = sensor['locationName']
         _pin = sensor['name']
         _id = sensor['sensorId']
@@ -481,10 +484,11 @@ class GEOSystem(PollingProcessor):
                 if row['ID'] not in self._warned:
                     print "Warning: Unable to locate sensor record for GEO sensor %s. ID: %s" % (row['Description'], row['ID'])
                     self._warned.append(row['ID'])
-                elif sensor['ChannelDescriptor'] not in self._connected:
-                    print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
-                    self._connected.append(sensor['ChannelDescriptor'])
                 continue
+
+            if sensor['ChannelDescriptor'] not in self._connected:
+                print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+                self._connected.append(sensor['ChannelDescriptor'])
 
             _device = sensor['locationName']
             _name = sensor['name']
@@ -519,8 +523,8 @@ if __name__ == '__main__':
     if activeLocation == None:
         print "Unable to determine active experiment Location"
         exit
-        else:
-                print "Loading settings for experiment location %s" % (activeLocation['location'], )
+    else:
+        print "Loading settings for experiment location %s" % (activeLocation['location'], )
     
     sensorPollers = []
     dataUpdaters = []

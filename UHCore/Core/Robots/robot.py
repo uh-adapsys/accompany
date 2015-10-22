@@ -200,8 +200,13 @@ class Robot(object):
             return (None, None)
         
         curPos = state['positions']
+        if robot_config.has_key(self.name) and robot_config[self.name].has_key(componentName) and robot_config[self.name][componentName].has_key('positions'):
+            config_positions = robot_config[self.name][componentName]['positions']
+        else:
+            config_positions = {}
 
         positions = self.getComponentPositions(componentName)
+        positions.update(config_positions)
         
         if len(positions) == 0:
             #print >> sys.stderr, "Unable to retrieve named positions. Name resolution will now abort"
@@ -228,9 +233,8 @@ class Robot(object):
                 diff = dist
                         
         if diff <= tolerance:
-            if robot_config.has_key(self.name) and robot_config[self.name].has_key(componentName) and robot_config[self.name][componentName].has_key('positions'):
-                positions = robot_config[self.name][componentName]['positions']
-                for key, value in positions.items():
+            if config_positions:
+                for key, value in config_positions.items():
                     if value == name:
                         return (key, state)
             return (name, state)
