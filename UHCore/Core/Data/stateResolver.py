@@ -37,11 +37,11 @@ class StateResolver(object):
     def evaluateBoolean(self, sensorType, value):
         """ Evaluation for boolean sensor types (REED, PRESSUREMAP, SWITCH) """
         if sensorType == 'CONTACT_REED':
-            return float(value) == 1
+            return float(value) >= 0.5
         elif sensorType == 'CONTACT_PRESSUREMAT':
-            return float(value) != 1
+            return float(value) < 0.5
         elif sensorType == 'LEVEL_SENSOR_SWITCH':
-            return float(value) == 1
+            return float(value) > 0.5
         else:
             if not self._warned.has_key(sensorType):
                 print "Unknown boolean sensorType: %s, defaulting to 0 == False all else True" % sensorType
@@ -54,13 +54,17 @@ class StateResolver(object):
     def evaluateRule(self, rule, value):
         """ Evaluation for rule based sensors (Currently use only for POWERLINE sensors) """
         try:
-            # Rules are in Java notation
-            pyRule = rule.replace('&&', 'and').replace('||', 'or')
-            # Watts = float(value)
-            pyRule = pyRule.replace('Watts', str(value))
-            return eval(pyRule)
+            if value is not None and str(value) != '':
+                # Rules are in Java notation
+                pyRule = rule.replace('&&', 'and').replace('||', 'or')
+                # Watts = float(value)
+                pyRule = pyRule.replace('Watts', str(value))
+                return eval(pyRule)
+            else:
+                return None
         except Exception as e:
-            print >> sys.stderr, 'Error parsing rule "%(rule)s", Exception: %(exception)s' % { 'rule': rule, 'exception': e }
+            print "Value: %s" % (type(value), )
+            print >> sys.stderr, 'Error parsing rule "%(rule)s" parsed:"%(pyrule)s", Exception: %(exception)s' % { 'rule': rule, 'pyrule': pyRule, 'exception': e }
             return None
     
     def resolveStates(self, sensorList):
@@ -69,11 +73,19 @@ class StateResolver(object):
         states = []
                 
         for sensor in sensorList:
+            isOn = self.isSensorOn(sensor)
+            disp = self.getDisplayState(sensor)
+            if isOn is None or disp is None:
+                if not "state_%s" % (sensor['sensorId'], ) not in self._warned:
+                    print >> sys.stderr, 'Error parsing sensor "%(sensor)s" isOn:"%(isOn)s", state: %(state)s' % { 'sensor': sensor['name'], 'isOn': isOn, 'state': disp }
+                continue
+            else:
+                self._warned.pop("state_%s" % (sensor['sensorId'], ), None)
             state = {
                       'id': sensor['sensorId'],
                       'value': sensor['value'],
-                      'on': self.isSensorOn(sensor),
-                      'state': self.getDisplayState(sensor),
+                      'on': isOn,
+                      'state': disp,
                       'xCoord': sensor['xCoord'],
                       'yCoord': sensor['yCoord'],
                       'orientation': '%sd' % sensor['orientation'],

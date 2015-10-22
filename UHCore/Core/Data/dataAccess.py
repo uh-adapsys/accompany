@@ -180,15 +180,16 @@ class UserInterface(object):
             args = {'seqName': sequenceName}
 
         data = []
+        sizer = lambda x: 'l' if int(x) > 0 else 's'
         for response in self._sql.getData(sql, args):
             for msgId in range(1, 5):
                 if len(response['guiMsg%s' % (msgId)].strip()) > 0:
                     data.append({
-                        'guiResponseId': msgId,
-                        'message': response['guiMsg%s' % (msgId)],
-                        'size': 'l' if int(response['guiMsg%sEnlarged' % (msgId)]) > 0 else 's',
-                        'seqName': response['name']
-                    })
+                                 'guiResponseId':msgId,
+                                 'message':response['guiMsg%s' % (msgId)],
+                                 'size': sizer(response['guiMsg%sEnlarged' % (msgId)]),
+                                 'seqName':response['name']
+                                 })
         return data
 
 
@@ -419,13 +420,44 @@ class ActionHistory(object):
         self._sensorTable = sensorTable or server_config['mysql_sensor_table']
         self._locationTable = locationTable or server_config['mysql_location_table']
         self._sensorTypeTable = sensorTypeTable or server_config['mysql_sensorType_table']
+        self._userTable = userTable or server_config['mysql_users_table']
+        self._scenarioTable = scenarioTable or server_config['mysql_scenario_table']
         self._sql = SQLDao()
-        self._selectQuery = "SELECT `actionHistoryId`, `imageId`, `imageOverheadId`, `timestamp`, `ruleName`, `tags`, `%(loc)s`.`name` as 'location' \
+        self._selectQuery = "SELECT `actionHistoryId`, `imageId`, `imageOverheadId`, `timestamp`, `ruleName`, `tags`,\
+               `%(loc)s`.`name` as 'location', `%(user)s`.`nickname` as 'nickname', `%(scen)s`.`name` as 'scenario', \
+               `%(scen)s`.`description` as 'description', `%(scen)s`.`image` as 'imageArt',\
+               `%(scen)s`.`shortDescription` as 'shortDescription'\
                FROM `%(hist)s` \
+               INNER JOIN `%(user)s` ON `%(user)s`.`userId` = `%(hist)s`.`userId`\
+               INNER JOIN `%(scen)s` ON `%(scen)s`.`scenarioId` = `%(hist)s`.`scenarioId`\
                INNER JOIN `%(loc)s` ON `%(loc)s`.`locationId` = `%(hist)s`.`locationId`" % {
-            'hist': self._historyTable,
-            'loc': self._locationTable
-        }
+                                                                                            'hist' : self._historyTable,
+                                                                                            'loc': self._locationTable,
+                                                                                            'user': self._userTable,
+                                                                                            'scen': self._scenarioTable
+                                                                                           }
+    def getHistoryOrdered(self, ruleName=None, tags=None):
+        sql = self._selectQuery
+        args = {}
+        where = ''
+        if ruleName != None:
+            where = self._appendWhere(where, "`ruleName` = %(name)s")
+            args['name'] = ruleName
+        if tags != None and len(tags) > 0:
+            clause = ''
+            for index in range(0, len(tags)):
+                tag = tags[index]
+                key = 'tag_' + str(index)
+                clause += "`tags` like %(" + key + ")s"
+                if index + 1 != len(tags):
+                    clause += " OR "
+                args[key] = "%'" + tag + "'%"
+            clause = '(' + clause + ')'
+            where = self._appendWhere(where, clause)
+
+        sql += where
+        sql += ' ORDER BY `timestamp` asc'
+        return self._processResultsOrdered(self._sql.getData(sql, args))
 
     def getHistory(self, ruleName=None, tags=None):
         sql = self._selectQuery
@@ -461,25 +493,112 @@ class ActionHistory(object):
         result = []
         for row in data:
             obj = {
-                'id': row['actionHistoryId'],
-                'name': row['ruleName'],
-                'status': 'activate',
-                'imageId': row['imageId'],
-                'imageOverheadId': row['imageOverheadId'],
-                'location': row['location'],
-                'tags': eval(row['tags'] or '()'),
-                'time': {
-                    'real': row['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
-                    'narrative': row['timestamp'].strftime('%Y%m%d%H%M%S')
-                },
-                'sensors': self.getSensorSnapshot(row['actionHistoryId'])
-            }
-
+                       'id': row['actionHistoryId'],
+                       'name':row['ruleName'],
+                       'status': 'activate',
+                       'imageId':row['imageId'],
+                       'imageOverheadId':row['imageOverheadId'],
+                       'location': row['location'],
+                       'tags': eval(row['tags'] or '()'),
+                       'time': {
+                                'real': row['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+                                'narrative': row['timestamp'].strftime('%Y%m%d%H%M%S')
+                                },
+                        #'sensors': self.getSensorSnapshot(row['actionHistoryId'])
+                       }
+            
             if type(obj['tags']) != list and type(obj['tags']) != tuple:
                 obj['tags'] = (obj['tags'],)
             result.append(obj)
-
+            
         return result
+
+    def _processResultsOrdered(self, data):
+        result = []
+        events = []
+        for row in data:
+            #if not row['scenario'] in events:
+            #  events.append(row['scenario'])
+            if row['ruleName'] == 'end':#added 'end' at the end of each episode in DB
+              events.append(row['scenario'])
+
+        _eventid=0
+        for e in events:
+          elements = {
+                        'eventId':str(_eventid),
+                        'scenario':e,
+                        'description':[],
+                        'shortDescription':[],
+                        'endTime':[],
+                        'imageArt':[],
+                        'whentime':[],
+                        'events':[]
+                        }
+          _eventid=_eventid+1
+          for row in data:
+              if e == row['scenario']:
+                obj = {
+                           'historyId': row['actionHistoryId'],
+                           'name':row['ruleName'],
+                           'status': 'activate',
+                           'imageId':row['imageId'],
+                           'imageOverheadId':row['imageOverheadId'],
+                           'location': row['location'],
+                           'nickname':row['nickname'],
+                           'scenario':row['scenario'],
+                           'tags': eval(row['tags'] or '()'),
+                           'time': {
+                                    'real': row['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+                                    'narrative': row['timestamp'].strftime('%Y%m%d%H%M%S')
+                                    }
+                           #'sensors': self.getSensorSnapshot(row['actionHistoryId'])
+                           }
+
+                if type(obj['tags']) != list and type(obj['tags']) != tuple:
+                    obj['tags'] = (obj['tags'],)
+              
+                elements['events'].append(obj)
+                elements['description']=row['description']
+                elements['imageArt']=row['imageArt']
+                elements['shortDescription']=row['shortDescription']
+                elements['endTime']=row['timestamp'].strftime('%Y%m%d%H%M%S')
+                elements['whentime']=self._processDate(row['timestamp'])
+
+          result.append(elements)
+        return result
+
+    def _processDate(self,data):
+        
+        from datetime import datetime
+        FMT='%Y-%m-%d %H:%M:%S'
+        now=datetime.now()
+
+        date=data.strftime('%Y-%m-%d %H:%M:%S')
+        totaldelta=datetime.strptime(now.strftime(FMT),FMT)-datetime.strptime(date,FMT)
+
+        midnight=now.strftime('%Y-%m-%d')+' 00:00:00'
+        deltatm=datetime.strptime(now.strftime(FMT),FMT)-datetime.strptime(midnight,FMT)
+
+        if totaldelta<deltatm:
+          return data.strftime('%H:%M:%S')
+        else:
+          sym="%02d" % (int(now.strftime('%d'))-1) #str(int(now.strftime('%d'))-1)
+          yesterdaymidnight=now.strftime('%Y-%m')+ '-' + sym + ' 00:00:00'
+          deltaytm=datetime.strptime(now.strftime(FMT),FMT)-datetime.strptime(yesterdaymidnight,FMT)
+          if totaldelta < deltaytm:
+            return 'Yesterday ' + data.strftime('%H:%M:%S')
+          else:
+            sym=int(now.strftime('%d'))-6
+            if sym>0:
+              sym="%02d" % sym
+            else:
+              sym= "%02d" % (31+sym)
+            lastweekmidnight=now.strftime('%Y-%m')+ '-' + sym + ' 00:00:00'
+            #deltalwtm=datetime.strptime(now.strftime(FMT),FMT)-datetime.strptime(lastweekmidnight,FMT)
+            #if totaldelta < deltalwtm:
+            return data.strftime('%A') + ' '+ data.strftime('%H:%M:%S')
+            #else:
+            #  return str(totaldelta.days) +' days ago. (' + data.strftime('%Y-%m-%d') + ')'
 
     def getSensorSnapshot(self, historyId):
         sql = "SELECT `%(sensor)s`.`name` as `name`, `%(sensor)s`.`sensorId` as `sensorId`, `%(sensor)s`.`sensorRule` as `sensorRule`, \
@@ -516,9 +635,9 @@ class ActionHistory(object):
                 rowCount += 1
 
         return rowCount
-
+    
     def saveHistory(self, timestamp, ruleName, locationId):
-        sql = "INSERT INTO `%s` (`timestamp`, `ruleName`, `locationId`)" % (self._historyTable)
+        sql = "INSERT INTO `%s` (`timestamp`, `ruleName`, `locationId`)" % (self._historyTable) 
         sql += " VALUES (%(time)s, %(rule)s, %(locid)s)"
         args = {
             'time': timestamp,
@@ -526,6 +645,16 @@ class ActionHistory(object):
             'locid': locationId
         }
 
+    def saveHistoryComplete(self, timestamp, ruleName, locationId, userId):
+        sql = "INSERT INTO `%s` (`timestamp`, `ruleName`, `locationId`,`userId`)" % (self._historyTable) 
+        sql += " VALUES (%(time)s, %(rule)s, %(locid)s, %(usr)s)" 
+        args = {
+                  'time' : timestamp,
+                  'rule': ruleName,
+                  'locid':locationId,
+                  'usrid':userId
+                  }
+        
         return self._sql.saveData(sql, args)
 
     def updateTags(self, historyId, tags):
@@ -865,6 +994,9 @@ class DataAccess(object):
     def getHistory(self, ruleName=None, tags=None):
         return self.actionHistory.getHistory(ruleName, tags)
 
+    def getHistoryOrdered(self, ruleName=None, tags=None):
+        return self.actionHistory.getHistoryOrdered(ruleName, tags)
+
     def getSensor(self, sensorId):
         return self.sensors.getSensor(sensorId)
 
@@ -882,6 +1014,9 @@ class DataAccess(object):
 
     def saveHistory(self, timestamp, ruleName, locationId):
         return self.actionHistory.saveHistory(timestamp, ruleName, locationId)
+
+    def saveHistoryComplete(self, timestamp, ruleName, locationId, user):
+        return self.actionHistory.saveHistory(timestamp, ruleName, locationId, user)
 
     def saveHistoryImage(self, historyId, imageBytes, imageType):
         return self.actionHistory.saveHistoryImage(historyId, imageBytes, imageType)
