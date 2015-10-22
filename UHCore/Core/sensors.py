@@ -111,6 +111,7 @@ class ZWaveHomeController(PollingProcessor):
 			# order determines priority
 			valueKeys = ['valueSensor', 'value']
 			
+
 			_value = None
 			for valueKey in valueKeys:
 				if device['properties'].has_key(valueKey):
@@ -236,6 +237,7 @@ class ZWaveVeraLite(PollingProcessor):
 										}
 				
 class ZigBeeDirect(PollingProcessor):
+
 	
 	def __init__(self, usbPort, baudRate=9600):
 		super(ZigBeeDirect, self).__init__()
@@ -409,6 +411,7 @@ class ZigBee(PollingProcessor):
 			_type = sensor['sensorTypeName']
 			_uuid = '%s_%s' % (mac , channel)
 			_status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule })
+
 
 			self._channels[_uuid] = { 
 									'id': _id,
