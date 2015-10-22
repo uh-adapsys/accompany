@@ -2,9 +2,41 @@
 
 /* Controllers */
 
-var historyApp = angular.module('historyApp', ['$strap.directives']);
-  
-historyApp.controller('EpisodesListCtrl', function EpisodesListCtrl($scope, $http) {
+var historyAppController = angular.module('historyAppController', ['ui.bootstrap']);
+
+historyAppController.controller('EpisodesListCtrl', function EpisodesListCtrl($scope, $http, $location) {
+  $http.get('data/events/').success(function(data) {
+    $scope.episodes = data;
+  });
+
+  $scope.orderEpisodes = 'endTime'; 
+
+  $scope.go = function ( path ) {
+    $location.path( "/history/"+path );
+  };
+
+  $scope.clearScenarioQuery = function() {
+    $scope.scenarioquery="";
+  }
+
+});
+
+historyAppController.controller('ImagesCtrl', function ImagesCtrl($scope, $http, $location,$routeParams) {
+  $http.get('data/events/').success(function(data) {
+    $scope.img = data;
+  });
+
+  $scope.img2Show = $routeParams.imageUrl;
+  $scope.eventId2Show = $routeParams.eventId;
+
+  $scope.goback = function ( path  ) {
+    $location.path( "/history/"+path);
+  };
+
+});
+
+
+historyAppController.controller('EpisodesDetailCtrl', function EpisodesDetailCtrl($scope, $routeParams, $http, $location){
   $http.get('data/events/').success(function(data) {
     $scope.episodes = data;
     $scope.tagsValue = '0';
@@ -12,11 +44,19 @@ historyApp.controller('EpisodesListCtrl', function EpisodesListCtrl($scope, $htt
     $scope.locationName = [];
   });
 
+  $scope.eventId2Show = $routeParams.eventId;
+
   $scope.tagsItems = [{ label: "memorable", value: "important" },{ label:"interesting", value: "interesting" },{ label:"unclear", value: "question" },{ label:"none", value: "0" }];
   $scope.orderProp = 'time.narrative';
+
+  $scope.go2 = function ( path  ) {
+    $location.path( "/history/" +$scope.eventId2Show+"/"+path);
+  };
   //$scope.ruleName = 'name';
 
-  
+  $scope.goback = function () {
+    $location.path( "/history");
+  };
 
   $scope.setRadioValue=function(radioVal){
     $scope.tagsValue=radioVal;
@@ -36,48 +76,33 @@ historyApp.controller('EpisodesListCtrl', function EpisodesListCtrl($scope, $htt
     if ($scope.locationName.indexOf(e)==-1) $scope.locationName.push(e);
   }
 
-
   $scope.loadRuleName = function (e) {
-    //$scope.ruleName.push(e);
-    //add if it's not repeated
     if ($scope.ruleName.indexOf(e)==-1) $scope.ruleName.push(e);
   }
 
-  $scope.clear_eventquery = function() {
+  $scope.clearEventQuery = function() {
     $scope.eventquery="";
   }
 
-  $scope.clear_locationquery = function() {
+  $scope.clearLocationQuery = function() {
     $scope.locationquery="";
   }
 
 
-});
+ });
 
-historyApp.controller('ModalCtrl', function ($scope, $modal){
-$scope.viaService = function() {
-    // create the modal
-    var modal = $modal({
-      template: 'angular/js/app/modal.html',
-      show: true,
-      scope: $scope,
-      persist: true,
-      backdrop: 'static'
-    });
-$scope.parentController = function(dismiss) {
-    console.warn(arguments);
-    // do something
-    dismiss();
-    }
-  }
-});
+// historyAppController.controller('EpisodesDetailCtrl', function ($scope, $routeParams, $http){
+//   $http.get('json/' + $routeParams.eventId + '.json').success(function(data) {
+//    $scope.episodes = data;
+//   });
+//  // $scope.eventId = $routeParams.eventId;
+//  });
 
-historyApp.controller('TagsCtrl', function TagsCtrl($scope,$html){
-  $http.post('data/tags/').success(function(data){
-    $scope.tag=data;
-  });
-    
-});
+//historyApp.controller('TagsCtrl', function TagsCtrl($scope,$html){
+//  $http.post('data/tags/').success(function(data){
+//    $scope.tag=data;
+//  });
+//});
 //historyControllers.controller('EpisodesDetailCtrl', ['$scope', '$routeParams',
 //  function($scope, $routeParams) {
 //    $scope.phoneId = $routeParams.phoneId;

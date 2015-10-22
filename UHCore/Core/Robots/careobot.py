@@ -36,9 +36,10 @@ class CareOBot(robot.ROSRobot):
         if len(self._ros.getTopics('/%(name)s_controller' % { 'name': name })) == 0:
             self._robInt.initComponent(name)
         
-        #Special handling of the unload_tray moveit code value='trayToTable:height'
+        # Special handling of the unload_tray moveit code value='trayToTable:height'
         if name == 'arm' and str(value).startswith('trayToTable'):
-            return self.unloadTray(str(value).split(':')[1], blocking)
+            return self.unloadTray2()
+            #return self.unloadTray(str(value).split(':')[1], blocking)
         if name == 'arm' and str(value).startswith('vaseToTray'):
             return self.graspObject(str(value).split(':')[1], blocking)
         
@@ -52,7 +53,7 @@ class CareOBot(robot.ROSRobot):
     
     def say(self, text, languageCode="en-gb", blocking=True):
         self.executeFunction("say", {
-                                     'parameter_name': [text,],
+                                     'parameter_name': [text, ],
                                      'blocking': blocking })
         
     def sleep(self, milliseconds):
@@ -72,7 +73,48 @@ class CareOBot(robot.ROSRobot):
             return robot._states[4]
         
         return client.graspObject(h, blocking)
-    
+
+    def unloadTray2(self):
+        preTray = ['intermediateback', 'intermediatefront']
+        result = self.setComponentState('arm', preTray)
+        if result != robot._states[3]:
+            return result
+
+        result = self.setComponentState('sdh', 'cylopen', False)
+
+        toTray = [[-0.984027087688446, -1.140375018119812, 2.1297147274017334, 1.3432016372680664, 0.0949307382106781, 1.254434585571289, -0.09231046587228775]]
+        result = self.setComponentState('arm', toTray)
+        if result != robot._states[3]:
+            return result
+
+        result = self.setComponentState('sdh', 'cylclosed')
+        if result != robot._states[3]:
+            return result
+
+        toTable = [
+                [-1.1339423656463623, -0.8576790690422058, 2.1843912601470947, 1.512700080871582, -0.19399335980415344, 1.018735408782959, -0.007529350463300943],
+                'intermediatefront',
+                [0.4284842014312744, -1.993200659751892, 0.6682865023612976, 0.9998711943626404, 0.846721887588501, 0.98497474193573, 0.48370054364204407]
+            ]
+        result = self.setComponentState('arm', toTable)
+        if result != robot._states[3]:
+            return result
+
+        result = self.setComponentState('sdh', 'cylopen')
+        if result != robot._states[3]:
+            return result
+
+        preFold = [[0.7757912874221802, -1.9523566961288452, 0.6777072548866272, 0.9505879282951355, 0.6960620284080505, 1.411804437637329, 0.4911251962184906]]
+        result = self.setComponentState('arm', preFold)
+        if result != robot._states[3]:
+            return result
+
+        result = self.setComponentState('sdh', 'cylclosed', False)
+
+        toFolded = ['intermediateback', 'folded']
+        result = self.setComponentState('arm', toFolded)
+        return result
+
     def unloadTray(self, height, blocking):
         " Calls the 'unloadTrayServer' on to unload an object from the tray to a table assumed to be at the specified height"
 
@@ -155,13 +197,13 @@ class ScriptServer(object):
         except AttributeError:
             raise Exception('Unknown function: %s' % (funcName))
         
-        #filter kwargs to only args in function
+        # filter kwargs to only args in function
         argspec = inspect.getargspec(func)
         args = {}
         for argName in argspec.args:
             if argName in kwargs.keys():
                 args[argName] = kwargs[argName]
-        #args = { argName: kwargs[argName] for argName in argspec.args if argName in kwargs.keys() }
+        # args = { argName: kwargs[argName] for argName in argspec.args if argName in kwargs.keys() }
 
         ah = func(**args)
         
@@ -176,7 +218,7 @@ class ScriptServer(object):
     
     def initComponent(self, name):       
         if name not in ScriptServer._specialCases.keys():
-            return self.runFunction('init', {'component_name': name} )
+            return self.runFunction('init', {'component_name': name})
         return 3
     
     def runComponent(self, name, value, mode='', blocking=True):
@@ -186,11 +228,11 @@ class ScriptServer(object):
             func = ScriptServer._specialCases[name]['function']
             mode = ScriptServer._specialCases[name]['mode']
             
-        return self.runFunction(func, 
+        return self.runFunction(func,
                                 {
-                                   'component_name':name, 
-                                   'parameter_name':value, 
-                                   'mode':mode, 
+                                   'component_name':name,
+                                   'parameter_name':value,
+                                   'mode':mode,
                                    'blocking': blocking
                                 })
 
@@ -255,7 +297,7 @@ class ActionLib(object):
     
     def initComponent(self, name):
         if name not in ActionLib._specialCases.keys():
-            return self.runFunction('init', {'component_name': name} )
+            return self.runFunction('init', {'component_name': name})
         return 3
     
     def runComponent(self, name, value, mode=None, blocking=True):
@@ -265,11 +307,11 @@ class ActionLib(object):
             func = ActionLib._specialCases[name]['function']
             mode = ActionLib._specialCases[name]['mode']
             
-        return self.runFunction(func, 
+        return self.runFunction(func,
                                 {
-                                   'component_name':name, 
-                                   'parameter_name':value, 
-                                   'mode':mode, 
+                                   'component_name':name,
+                                   'parameter_name':value,
+                                   'mode':mode,
                                    'blocking': blocking
                                 })
 
@@ -327,7 +369,7 @@ class PoseUpdater(robot.PoseUpdater):
             if rangeMsg.range < 0:
                 if topic + '_rangeErr' not in self._warned:
                     self._warned.append(topic + '_rangeErr')
-                    print >> sys.stderr,  "Phidget sensor returned invalid range! %s:%s" % (topic, rangeMsg.range)
+                    print >> sys.stderr, "Phidget sensor returned invalid range! %s:%s" % (topic, rangeMsg.range)
                 self._rangeHistory.pop(topic)
                 continue
             elif topic + '_rangeErr' in self._warned:
@@ -358,11 +400,11 @@ class PoseUpdater(robot.PoseUpdater):
         (stateName, state) = robot.getComponentState(componentName)
         if stateName == None or len(state['positions']) == 0:
             if len(state['positions']) == 0:
-                #Error while retreiving state
+                # Error while retreiving state
                 return (None, None)
 
         if stateName == '':
-            #print "No named component state for: %s." % (componentName)
+            # print "No named component state for: %s." % (componentName)
             stateName = 'Unknown'
         
         p = []

@@ -10,7 +10,7 @@
         <div class="btn-group" ng-change="setTags(tagsValue,event)" ng-model="tagsValue" bs-buttons-radio>
                 <button ng-repeat="item in tagsItems" type="button" class="btn" value="{{item.value}}" >{{item.label}}</button>
         </div></br></br>
-        <p>Robot:<img ng-src="{{event.imageUrl}}"></p>
+        <p>Robot: <img ng-src="{{event.imageUrl}}"></p>
         <p>Overview:<img ng-src="{{event.imageOverheadUrl}}"></p>
         <!--img ng-src="{{event.sensorMapUrl}}"-->
 </div>
