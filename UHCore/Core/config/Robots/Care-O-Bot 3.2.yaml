@@ -1,0 +1,23 @@
+Care-O-Bot 3.2:
+  phidgets:
+    topics:
+    - /range_0
+    - /range_1
+    - /range_2
+    - /range_3
+    windowSize: 5
+  tray:
+    positions:
+      raised: up
+      lowered: down
+    size: 20
+  head:
+    positions:
+      front: front
+      back: back
+    camera:
+      topic: /stereo/right/image_color/compressed
+      rotate:
+        angle: 180
+        distance: 90
+        amount: 180

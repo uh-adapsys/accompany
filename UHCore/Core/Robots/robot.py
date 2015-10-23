@@ -100,6 +100,9 @@ class Robot(object):
     @property
     def name(self):
         return self._name
+    
+    def getPID(self):
+        return os.getpid()
                 
     def getImage(self, retFormat='PNG'):
         """ Abstract, should be implemented by robots supporting image processing""" 
@@ -248,6 +251,212 @@ class Robot(object):
             ret = val
         
         return ret
+
+
+class ROSRobot(Robot):
+    """ Abastract base class for robots that are based on the ROS architecture """
+    _imageFormats = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'PCD', 'PCX', 'PDF', 'PNG', 'PPM', 'TIFF', 'XBM', 'XPM']
+
+    def __init__(self, name, robotInterface, serverTopic, imageTopic):
+        """ Assumes a service structure similar to that of the IPA Care-O-Bot """
+        """ Robots known to work are the IPA Care-O-Bot (3.2,3.5,3.6) and the UH Sunflower (1.1, 1.2) """
+        super(ROSRobot, self).__init__(name, robotInterface)
+        self._rs = None
+        self._tf = None
+        self._serverTopic = serverTopic
+        self._imageTopic = imageTopic
+    
+    @property
+    def _transform(self):
+        """ Transform between the robot base frame and the map frame, used in getLocation() """
+        if self._tf == None:
+            try:
+                import rosHelper
+                self._tf = rosHelper.Transform(rosHelper=self._rs, toTopic='/base_footprint', fromTopic='/map')
+            except Exception as e:
+                print >> sys.stderr, "Error occured while calling transform: %s" % repr(e)
+        return self._tf
+        
+    @property
+    def _ros(self):
+        """ ROS Interface, current options are rosHelper(stable) and rosMulti(incomplete) """
+        # Wait to configure/initROS ROS till it's actually needed
+        if self._rs == None:
+            import rosHelper
+            self._rs = rosHelper.ROS()
+        return self._rs
+    
+    def getImage(self, retFormat='PNG'):
+        """ Returns the image from the robots camera (topic specified in robot_config) or None if no camera """
+        """ While retFormat is taken into account, PIL appers to always return a JPG file, issue has not been investigated """
+        if not robot_config.has_key(self.name) or not robot_config[self.name]['head'].has_key('camera'):
+            return None
+        
+        img_msg = self._ros.getSingleMessage(self._imageTopic)
+        if img_msg == None:
+            return None
+        
+        from PIL import Image
+        imgBytes = io.BytesIO()
+        imgBytes.write(img_msg.data)
+        
+        imgBytes.seek(0)
+        img = Image.open(imgBytes)
+
+        if robot_config[self._name]['head']['camera'].has_key('rotate'):
+            angle = self.getCameraAngle() or 0
+    
+            a = abs(angle - robot_config[self._name]['head']['camera']['rotate']['angle'])
+            if a > 180:
+                a = abs(a - 360)
+            
+            # 0=back, 180=front, 270=top, 90=bottom.  rotate if not front (0-180 are invalid angles, only included for 'buffer')
+            # if angle <= 90 and angle >= 270:
+            if a <= robot_config[self._name]['head']['camera']['rotate']['distance']:
+                img = img.rotate(robot_config[self._name]['head']['camera']['rotate']['amount'])
+        
+        retFormat = retFormat.upper()
+        if retFormat == 'JPG':
+            retFormat = 'JPEG'
+            
+        if retFormat not in Robot._imageFormats:
+            retFormat = 'PNG' 
+        
+        imgBytes.seek(0)
+        img.save(imgBytes, retFormat)
+
+        return imgBytes.getvalue()
+
+    def getImageOverhead(self, retFormat='PNG'):
+        """ Returns the image from the overhead camera (topic is '/camera_living/image_raw/compressed' ) """
+        """ While retFormat is taken into account, PIL appers to always return a JPG file, issue has not been investigated """
+        #if not robot_config.has_key(self.name) or not robot_config[self.name]['head'].has_key('camera'):
+        #    return None
+        
+        img_msg = self._ros.getSingleMessage('/camera_living/image_raw/compressed')
+        if img_msg == None:
+            return None
+        
+        from PIL import Image
+        imgBytes = io.BytesIO()
+        imgBytes.write(img_msg.data)
+        
+        #imgBytes.seek(0)
+        #img = Image.open(imgBytes)
+
+        #if robot_config[self._name]['head']['camera'].has_key('rotate'):
+        #    angle = self.getCameraAngle() or 0
+    
+        #    a = abs(angle - robot_config[self._name]['head']['camera']['rotate']['angle'])
+        #    if a > 180:
+        #        a = abs(a - 360)
+            
+            # 0=back, 180=front, 270=top, 90=bottom.  rotate if not front (0-180 are invalid angles, only included for 'buffer')
+            # if angle <= 90 and angle >= 270:
+        #    if a <= robot_config[self._name]['head']['camera']['rotate']['distance']:
+        #        img = img.rotate(robot_config[self._name]['head']['camera']['rotate']['amount'])
+        
+        #retFormat = retFormat.upper()
+        #if retFormat == 'JPG':
+        #    retFormat = 'JPEG'
+            
+        #if retFormat not in Robot._imageFormats:
+        #    retFormat = 'PNG' 
+        
+        #imgBytes.seek(0)
+        #img.save(imgBytes, retFormat)
+
+        return imgBytes.getvalue()
+    
+    def getLocation(self, dontResolveName=False):
+        """ Returns a tuple containing ('LocName or Empty', (X, Y, Theta))"""
+        tf = self._transform
+        if tf == None:
+            return ('', (None, None, None))
+
+        ((x, y, _), rxy) = tf.getTransform()
+        if x == None or y == None:
+            return ('', (None, None, None))
+        
+        angle = round(math.degrees(rxy))
+        pos = (round(x, 3), round(y, 3), angle)
+        
+        if dontResolveName:
+            return ('', pos)
+        else:
+            return Data.dataAccess.Locations.resolveLocation(pos)
+
+    def setComponentState(self, name, value, blocking=True):
+        """
+            Set the named component to the given value
+            value can be a string for a named position, or an array of floats for specific joint values
+                The length of the array must match the length of the named joints for the component
+            if name is base and value is userLocation, this will cause the proxemics module to be called
+                to send the robot near the users current location
+            set blocking to true(default) for this function to block until completed
+            if blocking is set to false, this function will return immediately with value 'ACTIVE'
+        """
+        if name == "base" and value == "userLocation":
+            user = Users().getActiveUser()
+            if user['xCoord'] != None and user['yCoord'] != None and user['orientation'] != None:
+                try:
+                    p = ProxemicMover(self)
+                    if p.gotoTarget(user['userId'], user['poseId'], user['xCoord'], user['yCoord'], user['orientation']):
+                        return _states[3]
+                    else:
+                        pass
+                        #return _states[4]
+                except Exception as e:
+                    print >> sys.stderr, "Exception occurred while calling proxemics: %s" % e
+                
+                value = [user['xCoord'], user['yCoord'], math.radians(user['orientation'])]
+                print >> sys.stderr, "Proxemics failed, proceeding directly to location (%s, %s, %s)" % (
+                                                                                                            user['xCoord'], 
+                                                                                                            user['yCoord'], 
+                                                                                                            user['orientation'])
+            else:
+                print >> sys.stderr, "Could not go to user location, missing information.  X:%s, Y:%s, T:%s" % (
+                                                                                                            user['xCoord'], 
+                                                                                                            user['yCoord'], 
+                                                                                                            user['orientation'])
+        
+        status = super(ROSRobot, self).setComponentState(name, value, blocking)
+        # There is a bug in the Gazebo COB interface that prevents proper trajectory tracking
+        # this causes most status messages to come back as aborted while the operation is still
+        # commencing, time delay to attempt to compensate...
+        if status != _states[3] and len(self._ros.getTopics('/gazebo')) > 0:
+            time.sleep(1)
+            print >> sys.stderr, 'Gazebo hack: state ' + status + ' changed to state ' + _states[3]
+            status = _states[3]
+        
+        return status
+
+    def getComponentPositions(self, componentName):
+        """ Abstract, Returns a dictionary that contains all available named positions and their """
+        """     associated value arrays {'PositionName', [values, ...]} """
+        return self._ros.getParam('%s/%s' % (self._serverTopic, componentName))
+
+    def getComponents(self):
+        """ Returns a list of all available components """
+        return self._ros.getParam(self._serverTopic).keys()
+        
+    def getComponentState(self, componentName, dontResolveName=False):
+        """ Return the a tuple containing the state (named and raw) of the named component.  """
+        """ Name resolution can be skipped by setting dontResolveName=True. """
+        """ ('Name or Empty', {'name': '...', 'positions': [..., ...], 'goals': [..., ...], 'joints': [..., ...] })"""
+        topic = '/%(name)s_controller/state' % { 'name': componentName }
+        state = self._ros.getSingleMessage(topic)
+        
+        try:
+            ret = {'name': componentName, 'positions': state.actual.positions, 'goals': state.desired.positions, 'joints': state.joint_names }
+        except:
+            print "Error retrieving joint state" 
+            ret = {'name': componentName, 'positions': (), 'goals': (), 'joints': () }
+            
+        if dontResolveName:
+            return ('', ret)
+        else:
+            return self.resolveComponentState(componentName, ret)
 
 
 class ROSRobot(Robot):

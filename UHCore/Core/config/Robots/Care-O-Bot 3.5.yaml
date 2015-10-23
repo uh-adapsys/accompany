@@ -1,0 +1,27 @@
+Care-O-Bot 3.5:
+  phidgets:
+    topics:
+    - /tray_sensors/range_0
+    - /tray_sensors/range_1
+    - /tray_sensors/range_2
+    - /tray_sensors/range_3
+    windowSize: 5
+  tray:
+    positions:
+      raised: deliverup
+      lowered: storetray
+      intermediate:
+      - - 0.0
+        - 1.57
+        - -2.36
+    size: 10
+  head:
+    positions:
+      front: front
+      back: back
+    camera:
+      topic: /stereo/right/image_color/compressed
+      rotate:
+        angle: 0
+        distance: 90
+        amount: 180

@@ -14,7 +14,8 @@ class CareOBot(robot.ROSRobot):
 
     def __init__(self, name, rosMaster):
         rosHelper.ROS.configureROS(rosMaster=rosMaster)
-        super(CareOBot, self).__init__(name, ActionLib, 'script_server', robot_config[name]['head']['camera']['topic'])
+        topic = robot_config.get(name, {}).get('head', {}).get('camera', {}).get('topic', 'camera')
+        super(CareOBot, self).__init__(name, ActionLib, 'script_server', topic)
         #super(CareOBot, self).__init__(name, ScriptServer, 'script_server', robot_config[name]['head']['camera']['topic'])
                
     def getCameraAngle(self):

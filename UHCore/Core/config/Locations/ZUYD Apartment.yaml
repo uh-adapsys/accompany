@@ -1,0 +1,18 @@
+ZUYD Apartment:
+  sensors:
+  - type: ZWaveHomeController
+    zwave_ip: 192.168.1.109
+    zwave_port: 80
+  - type: ZigBeeDirect
+    usb_port: /dev/ttyUSB0
+  map:
+    base: zuyd.svg
+    scale: 0.275
+    offset:
+      x: 105
+      y: 300
+    svg_rotation: -90
+    pgm_scale: 0.05
+    pgm_offset:
+      x: 0
+      y: 0

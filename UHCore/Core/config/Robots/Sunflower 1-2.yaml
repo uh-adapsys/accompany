@@ -1,0 +1,31 @@
+# Controlls various magic strings that are specific to individulal robot models
+#    Structure is as follows:
+#      Robot Name:
+#        componentName:
+#          positions:
+#            generic: robot specific rosparam
+#          ...other component specific settings...
+#
+#    Some component settings are:
+#        tray:
+#            size: Activation range for the phidget sensors (COB Only)
+#        head:
+#          camera:
+#            topic: ROS topic to get the image from
+#            rotate:
+#              angle: when to rotate the image
+#              distance: tolerance (angle+-distance)
+#              amount: how much to rotate by (img.rotate(amount))
+#        hostname:
+#            override: ROS_MASTER_URI used in robotFactory() constructor
+#                      I.E. COB3.2 default is built as cob3-2-pc1, if override is set to cob3_2_pc1
+#                      cob3_2_pc1 will be used instead
+Sunflower 1-2:
+  tray:
+    positions:
+      raised: open
+      lowered: closed
+  head:
+    positions:
+      front: home
+      back: back_right
