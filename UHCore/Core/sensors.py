@@ -1,15 +1,20 @@
 #!/usr/bin/env python
+import base64
+import json
 import sys
+import urllib2
+
 from socket import AF_INET, SOCK_DGRAM, socket, timeout
+
 from Data.dataAccess import SQLDao, Sensors, Locations
 from Data.stateResolver import StateResolver
-import json, urllib2, base64
-
 from extensions import PollingProcessor
 
 """ Implementations of various sensor network updaters """
 
+
 class _valueHelper(object):
+
     @staticmethod
     def filterValue(value, sensorType):
         """ Used by all sensor processors to pre-process raw values from various sensors """
@@ -25,11 +30,11 @@ class _valueHelper(object):
         elif sensorType == 'POWER_CONSUMPTION_MONITOR':
             try:
                 val = '%.1f' % float(val)
-            except Exception as e:
+            except Exception:
                 print "Err: %s" % val
-        elif value == True: #1 and 0 are preferred for value
+        elif value is True:  # 1 and 0 are preferred for value
             val = 1
-        elif value == False:
+        elif value is False:
             val = 0
         return val
 
@@ -42,13 +47,15 @@ class _valueHelper(object):
 # the channel array.
 #
 ################################################################################
+
+
 class ZWaveHomeController(PollingProcessor):
 
     # Initialisation method
     # Opens the configured UDP socket for the receipt of broadcast messages.
-    def __init__ (self, ipAddress):
+    def __init__(self, ipAddress):
         super(ZWaveHomeController, self).__init__()
-        
+
         self._baseUrl = "http://%(ip)s:80/api/devices" % {'ip': ipAddress}
 
         # Place for the callback methods to store "static" values.
@@ -64,9 +71,9 @@ class ZWaveHomeController(PollingProcessor):
 
     @property
     def channels(self):
-        if self._channels == None:
+        if self._channels is None:
             self._channels = {}
-        
+
         return self._channels
 
     def start(self):
@@ -76,7 +83,7 @@ class ZWaveHomeController(PollingProcessor):
     def stop(self):
         print "Stopped polling zwave sensors"
         self._removePollingProcessor('zwave')
-        
+
     def pollZWaveSensors(self):
         """ Check the http api for sensors & values and add them to the channels list in the standard format """
         try:
@@ -86,13 +93,13 @@ class ZWaveHomeController(PollingProcessor):
             base64string = base64.encodestring('%s:%s' % ('admin', 'admin')).replace('\n', '')
             request.add_header("Authorization", "Basic %s" % base64string)
             result = urllib2.urlopen(request)
-            data = json.load(result) 
+            data = json.load(result)
         except Exception as e:
             if str(type(e)) not in self._warned:
                 print >> sys.stderr, "Error while receiving data from ZWaveHomeController: %s" % e
                 self._warned.append(str(type(e)))
             return
-        
+
         for device in data:
             channelDescriptor = 'zwave:' + str(device['id'])
             try:
@@ -107,34 +114,34 @@ class ZWaveHomeController(PollingProcessor):
             if sensor['ChannelDescriptor'] not in self._connected:
                 print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
                 self._connected.append(sensor['ChannelDescriptor'])
-    
+
             _device = sensor['locationName']
             _pin = sensor['name']
             _id = sensor['sensorId']
             _rule = sensor['sensorRule']
-    
+
             # order determines priority
             valueKeys = ['valueSensor', 'value']
-            
+
             _value = None
             for valueKey in valueKeys:
-                if device['properties'].has_key(valueKey):
+                if valueKey in device['properties']:
                     _value = device['properties'][valueKey]
                     break
-                
+
             _value = _valueHelper.filterValue(_value, sensor['sensorTypeName'])
-            if _value != None:
+            if _value is not None:
                 _type = sensor['sensorTypeName']
                 _uuid = channelDescriptor
-                _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule })
-    
-                self._channels[_uuid] = { 
-                                        'id': _id,
-                                        'room': _device,
-                                        'channel': _pin,
-                                        'value': _value,
-                                        'status': _status
-                                        }
+                _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule})
+
+                self._channels[_uuid] = {
+                    'id': _id,
+                    'room': _device,
+                    'channel': _pin,
+                    'value': _value,
+                    'status': _status
+                }
 
 
 ################################################################################
@@ -150,9 +157,9 @@ class ZWaveVeraLite(PollingProcessor):
 
     # Initialisation method
     # Opens the configured UDP socket for the receipt of broadcast messages.
-    def __init__ (self, ipAddress, port):
+    def __init__(self, ipAddress, port):
         super(ZWaveVeraLite, self).__init__()
-        
+
         self._loadTime = None
         self._dataVersion = None
         self._baseUrl = "http://%(ip)s:%(port)s/data_request?id=lu_sdata&timeout=%(timeout)s" % {'ip': ipAddress, 'port': port, 'timeout': 60}
@@ -170,9 +177,9 @@ class ZWaveVeraLite(PollingProcessor):
 
     @property
     def channels(self):
-        if self._channels == None:
+        if self._channels is None:
             self._channels = {}
-        
+
         return self._channels
 
     def start(self):
@@ -182,7 +189,7 @@ class ZWaveVeraLite(PollingProcessor):
     def stop(self):
         print "Stopped polling zwave sensors"
         self._removePollingProcessor('zwave')
-        
+
     # ZigBee thread main loop
     def pollZWaveSensors(self):
         """ Check the http api for sensors & values and add them to the channels list in the standard format """
@@ -191,18 +198,18 @@ class ZWaveVeraLite(PollingProcessor):
             # http://192.168.1.158:3480/data_request?id=lu_sdata
             # http://192.168.1.158:3480/data_request?id=lu_sdata&loadtime=1282441735&dataversion=441736333&timeout=60
             url = self._baseUrl
-            if self._loadTime != None and self._dataVersion != None:
-                url += '&loadtime=%(load)s&dataversion=(dataversion)s' % {'load': self._loadTime, 'dataversion': self._dataVersion }
-            data = json.load(urllib2.urlopen(url)) 
+            if self._loadTime is not None and self._dataVersion is not None:
+                url += '&loadtime=%(load)s&dataversion=(dataversion)s' % {'load': self._loadTime, 'dataversion': self._dataVersion}
+            data = json.load(urllib2.urlopen(url))
         except Exception as e:
             if str(type(e)) not in self._warned:
                 print >> sys.stderr, "Error while receiving data from ZWaveVeraLite: %s" % e
                 self._warned.append(str(type(e)))
             return
-        
+
         self._loadTime = data['loadtime']
         self._dataVersion = data['dataversion']
-        
+
         for device in data['devices']:
             channelDescriptor = 'zwave:' + str(device['id'])
             try:
@@ -217,7 +224,7 @@ class ZWaveVeraLite(PollingProcessor):
             if sensor['ChannelDescriptor'] not in self._connected:
                 print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
                 self._connected.append(sensor['ChannelDescriptor'])
-    
+
             _device = sensor['locationName']
             _pin = sensor['name']
             _id = sensor['sensorId']
@@ -227,26 +234,27 @@ class ZWaveVeraLite(PollingProcessor):
 
             _value = None
             for valueKey in valueKeys:
-                if device.has_key(valueKey):
+                if valueKey in device:
                     _value = device[valueKey]
                     break
-    
+
             _value = _valueHelper.filterValue(_value, sensor['sensorTypeName'])
-            if _value != None:
+            if _value is not None:
                 _type = sensor['sensorTypeName']
                 _uuid = channelDescriptor
-                _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule })
-    
-                self._channels[_uuid] = { 
-                                        'id': _id,
-                                        'room': _device,
-                                        'channel': _pin,
-                                        'value': _value,
-                                        'status': _status
-                                        }
-                
+                _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule})
+
+                self._channels[_uuid] = {
+                    'id': _id,
+                    'room': _device,
+                    'channel': _pin,
+                    'value': _value,
+                    'status': _status
+                }
+
+
 class ZigBeeDirect(PollingProcessor):
-    
+
     def __init__(self, usbPort, baudRate=9600):
         super(ZigBeeDirect, self).__init__()
         import serial
@@ -257,7 +265,7 @@ class ZigBeeDirect(PollingProcessor):
             print >> sys.stderr, "Unable to connect to zigbee port, check that the port name (%s) and permissions are correct (should be a+rw)" % (usbPort)
             raise e
         self._zigbee = ZigBee(self._port)
-        
+
         # Place for the callback methods to store "static" values.
         # Currently only needed for the Moving Average Filter for the MCP9700
         # temperature sensor temperature calculations.
@@ -268,18 +276,18 @@ class ZigBeeDirect(PollingProcessor):
         self._sensors = self._sensorDao.findSensors()
         self._warned = []
         self._connected = []
-    
+
     def __del__(self):
         self._port.close()
         super(ZigBeeDirect, self).__del__()
-    
+
     @property
     def channels(self):
-        if self._channels == None:
+        if self._channels is None:
             self._channels = {}
-        
+
         return self._channels
-    
+
     def start(self):
         print "Started polling directly connected zigBee sensors"
         self._addPollingProcessor('zigBeeDirect', self.pollZigbeeSensors, None, 0.1)
@@ -287,12 +295,12 @@ class ZigBeeDirect(PollingProcessor):
     def stop(self):
         print "Stopped polling directly connected zigBee sensors"
         self._removePollingProcessor('zigBeeDirect')
-        
+
     # ZigBee thread main loop
     def pollZigbeeSensors(self):
         """ Read the data from the Zigbee sensors directly connected to this machine """
         try:
-            #data, _ = self._xbee.wait_read_frame()
+            # data, _ = self._xbee.wait_read_frame()
             data = self._zigbee.wait_read_frame()
         except Exception as e:
             if str(type(e)) not in self._warned:
@@ -301,16 +309,16 @@ class ZigBeeDirect(PollingProcessor):
             return
 
         if data["id"] == "rx_explicit":
-            
+
             mac = repr(data['source_addr_long']).replace('\\x', ':').strip(":'").lower()
-            
+
             # If NI (Network Id)recognised include NI string in returned values
             try:
-                channels = self._zigbee._parse_samples(data['rf_data'])[0] # Parse IO data
+                channels = self._zigbee._parse_samples(data['rf_data'])[0]  # Parse IO data
             except Exception as e:
                 print >> sys.stderr, "Error reading zigbee data: %s" % e
                 return
-            
+
             for channel, _value in channels.items():
                 channel = "!" + channel.lower()
 
@@ -325,25 +333,25 @@ class ZigBeeDirect(PollingProcessor):
                 if sensor['ChannelDescriptor'] not in self._connected:
                     print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
                     self._connected.append(sensor['ChannelDescriptor'])
-                    
+
                 _device = sensor['locationName']
                 _pin = sensor['name']
                 _id = sensor['sensorId']
                 _rule = sensor['sensorRule']
-        
+
                 _value = _valueHelper.filterValue(_value, sensor['sensorTypeName'])
-                if _value != None:
+                if _value is not None:
                     _type = sensor['sensorTypeName']
-                    _uuid = '%s_%s' % (mac , channel)
-                    _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule })
-        
-                    self._channels[_uuid] = { 
-                                            'id': _id,
-                                            'room': _device,
-                                            'channel': _pin,
-                                            'value': _value,
-                                            'status': _status
-                                            }
+                    _uuid = '%s_%s' % (mac, channel)
+                    _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule})
+
+                    self._channels[_uuid] = {
+                        'id': _id,
+                        'room': _device,
+                        'channel': _pin,
+                        'value': _value,
+                        'status': _status
+                    }
 
 ################################################################################
 #
@@ -354,11 +362,13 @@ class ZigBeeDirect(PollingProcessor):
 # the channel array.
 #
 ################################################################################
+
+
 class ZigBee(PollingProcessor):
 
     # Initialisation method
     # Opens the configured UDP socket for the receipt of broadcast messages.
-    def __init__ (self, udpPort):
+    def __init__(self, udpPort):
         super(ZigBee, self).__init__()
         self.sock = socket(AF_INET, SOCK_DGRAM)
         self.sock.settimeout(1)
@@ -377,9 +387,9 @@ class ZigBee(PollingProcessor):
 
     @property
     def channels(self):
-        if self._channels == None:
+        if self._channels is None:
             self._channels = {}
-        
+
         return self._channels
 
     def start(self):
@@ -389,7 +399,7 @@ class ZigBee(PollingProcessor):
     def stop(self):
         print "Stopped polling zigBee sensors"
         self._removePollingProcessor('zigBee')
-        
+
     # ZigBee thread main loop
     def pollZigbeeSensors(self):
         """ Check the read sensors & values from the zigbee UDP broadcast and add them to the channels list in the standard format """
@@ -404,7 +414,7 @@ class ZigBee(PollingProcessor):
 
         mac = mac.lower()
         channel = channel.upper()
-        
+
         try:
             sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == str(mac) + str(channel))
         except StopIteration:
@@ -417,25 +427,25 @@ class ZigBee(PollingProcessor):
         if sensor['ChannelDescriptor'] not in self._connected:
             print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
             self._connected.append(sensor['ChannelDescriptor'])
-            
+
         _device = sensor['locationName']
         _pin = sensor['name']
         _id = sensor['sensorId']
         _rule = sensor['sensorRule']
 
         _value = _valueHelper.filterValue(_value, sensor['sensorTypeName'])
-        if _value != None:
+        if _value is not None:
             _type = sensor['sensorTypeName']
-            _uuid = '%s_%s' % (mac , channel)
-            _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule })
+            _uuid = '%s_%s' % (mac, channel)
+            _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule})
 
-            self._channels[_uuid] = { 
-                                    'id': _id,
-                                    'room': _device,
-                                    'channel': _pin,
-                                    'value': _value,
-                                    'status': _status
-                                    }
+            self._channels[_uuid] = {
+                'id': _id,
+                'room': _device,
+                'channel': _pin,
+                'value': _value,
+                'status': _status
+            }
 
 ################################################################################
 #
@@ -445,11 +455,13 @@ class ZigBee(PollingProcessor):
 # accordingly and stores them into the channel array.
 #
 ################################################################################
+
+
 class GEOSystem(PollingProcessor):
-    
-    def __init__ (self, hostName, userName, password, database, query):
+
+    def __init__(self, hostName, userName, password, database, query):
         super(GEOSystem, self).__init__()
-        self._geoDao = SQLDao(hostName, userName, password, database)        
+        self._geoDao = SQLDao(hostName, userName, password, database)
         self._geoQuery = query
         self._sensorDao = Sensors()
         self._sensors = self._sensorDao.findSensors()
@@ -459,7 +471,7 @@ class GEOSystem(PollingProcessor):
         self._connected = []
 
     @property
-    def channels(self):        
+    def channels(self):
         return self._channels
 
     def start(self):
@@ -502,67 +514,68 @@ class GEOSystem(PollingProcessor):
                 print 'Warning: Channel name differs from GEO-System description: %s / %s' % (_name, row['Description'])
                 self._warned.append(row['ID'])
 
-            _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule })
+            _status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule})
 
-            self._channels[row['ID']] = { 
-                                        'id': _id,
-                                        'room': _device,
-                                        'channel': _name,
-                                        'value': _value,
-                                        'status': _status
-                                        }
+            self._channels[row['ID']] = {
+                'id': _id,
+                'room': _device,
+                'channel': _name,
+                'value': _value,
+                'status': _status
+            }
 
 if __name__ == '__main__':
     """ Run sensor updaters for all sensor types configured in the locations_config for the currently """
     """ active experimental location """
     import config
     from history import SensorLog
-    
-    activeLocation = Locations().getActiveExperimentLocation() 
-    
-    if activeLocation == None:
+
+    activeLocation = Locations().getActiveExperimentLocation()
+
+    if activeLocation is None:
         print "Unable to determine active experiment Location"
         exit
     else:
         print "Loading settings for experiment location %s" % (activeLocation['location'], )
-    
+
     sensorPollers = []
     dataUpdaters = []
-    for sensorType in config.locations_config[activeLocation['location']]['sensors']:
+    for sensorConfig in config.locations_config[activeLocation['location']]['sensors']:
+        sensorType = sensorConfig.get('type')
         sensor = None
         if sensorType == 'ZWaveHomeController':
-            sensor = ZWaveHomeController(config.server_config['zwave_ip'])
+            sensor = ZWaveHomeController(sensorConfig['zwave_ip'])
         elif sensorType == 'ZWaveVeraLite':
-            sensor = ZWaveVeraLite(config.server_config['zwave_ip'], config.server_config['zwave_port'])
+            sensor = ZWaveVeraLite(sensorConfig['zwave_ip'], sensorConfig.get('zwave_port', 80))
         elif sensorType == 'ZigBee':
-            sensor = ZigBee(config.server_config['udp_listen_port'])
+            sensor = ZigBee(sensorConfig['udp_listen_port'])
         elif sensorType == 'ZigBeeDirect':
-            sensor = ZigBeeDirect(config.server_config['zigbee_usb_port'])
+            sensor = ZigBeeDirect(sensorConfig['usb_port'])
         elif sensorType == 'GEOSystem':
-            sensor = GEOSystem(config.server_config['mysql_geo_server'],
-                            config.server_config['mysql_geo_user'],
-                            config.server_config['mysql_geo_password'],
-                            config.server_config['mysql_geo_db'],
-                            config.server_config['mysql_geo_query'])
-    
-        if sensor != None:
+            sensor = GEOSystem(sensorConfig['geo_server'],
+                               sensorConfig['geo_user'],
+                               sensorConfig['geo_password'],
+                               sensorConfig['geo_db'],
+                               sensorConfig['geo_query'])
+
+        if sensor is not None:
             sensorPollers.append(sensor)
             dataUpdaters.append(SensorLog(sensor.channels, sensor.__class__.__name__))
 
     for sensorPoller in sensorPollers:
         sensorPoller.start()
-    
+
     for dataUpdater in dataUpdaters:
         dataUpdater.start()
-    
+
     while True:
         try:
             sys.stdin.read()
         except KeyboardInterrupt:
             break
-    
+
     for sensorPoller in sensorPollers:
         sensorPoller.stop()
-    
+
     for dataUpdater in dataUpdaters:
         dataUpdater.stop()
