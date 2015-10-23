@@ -37,12 +37,11 @@ void MainWindow::openbDB()
     bool ok;
 
 
-    QFile file("../UHCore/Core/config.py");
+    QFile file("../UHCore/Core/config/database.yaml");
 
     if (!file.exists())
     {
-        qDebug()<<"No config.py found!!";
-
+       qDebug()<<"No database config found!!";
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -54,27 +53,25 @@ void MainWindow::openbDB()
     QTextStream in(&file);
     while (!in.atEnd())
     {
-        QString line = in.readLine();
+       QString line = in.readLine();
 
-        if (line.contains("mysql_log_user"))
-        {
-            user = line.section("'",3,3);
-        }
-        if (line.contains("mysql_log_password"))
-        {
-            pw = line.section("'",3,3);
-        }
-        if (line.contains("mysql_log_server"))
-        {
-            host = line.section("'",3,3);
-        }
-        if (line.contains("mysql_log_db"))
-        {
-            dBase = line.section("'",3,3);
-        }
-
+       if (line.startsWith("mysql_log_user"))
+       {
+          user = line.section(":",1,1);
+       }
+       if (line.startsWith("mysql_log_password"))
+       {
+           pw = line.section(":",1,1);
+       }
+       if (line.startsWith("mysql_log_server"))
+       {
+          host = line.section(":",1,1);
+       }
+       if (line.startsWith("mysql_log_db"))
+       {
+          dBase = line.section(":",1,1);
+       }
     }
-
     user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
                                    user, &ok);
     if (!ok)

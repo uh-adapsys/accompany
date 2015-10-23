@@ -84,11 +84,11 @@ void MainWindow::on_openDBButton_clicked()
     bool ok;
 
 
-    QFile file("../UHCore/Core/config.py");
+    QFile file("../UHCore/Core/config/database.yaml");
 
     if (!file.exists())
     {
-       qDebug()<<"No config.py found!!";
+       qDebug()<<"No database config found!!";
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -102,21 +102,21 @@ void MainWindow::on_openDBButton_clicked()
     {
        QString line = in.readLine();
 
-       if (line.contains("mysql_log_user"))
+       if (line.startsWith("mysql_log_user"))
        {
-          user = line.section("'",3,3);
+          user = line.section(":",1,1);
        }
-       if (line.contains("mysql_log_password"))
+       if (line.startsWith("mysql_log_password"))
        {
-           pw = line.section("'",3,3);
+           pw = line.section(":",1,1);
        }
-       if (line.contains("mysql_log_server"))
+       if (line.startsWith("mysql_log_server"))
        {
-          host = line.section("'",3,3);
+          host = line.section(":",1,1);
        }
-       if (line.contains("mysql_log_db"))
+       if (line.startsWith("mysql_log_db"))
        {
-          dBase = line.section("'",3,3);
+          dBase = line.section(":",1,1);
        }
     }
 

@@ -52,11 +52,11 @@ void MainWindow::setup()
     bool ok;
     QString host, user, pw, dBase;
 
-    QFile file("../UHCore/Core/config.py");
+    QFile file("../UHCore/Core/config/database.yaml");
 
     if (!file.exists())
     {
-       qDebug()<<"No config.py found!!";
+       qDebug()<<"No database config found!!";
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -70,35 +70,26 @@ void MainWindow::setup()
     {
        QString line = in.readLine();
 
-       // deal with comments
-
-       if (line.contains("#"))
+       if (line.startsWith("mysql_log_user"))
        {
-           line = line.section("#",0,0); // everything after and inc the # is ignored
+          user = line.section(":",1,1);
        }
-
-       if (line.contains("mysql_log_user"))
+       if (line.startsWith("mysql_log_password"))
        {
-          user = line.section("'",3,3);
+           pw = line.section(":",1,1);
        }
-       if (line.contains("mysql_log_password"))
+       if (line.startsWith("mysql_log_server"))
        {
-           pw = line.section("'",3,3);
+          host = line.section(":",1,1);
        }
-       if (line.contains("mysql_log_server"))
+       if (line.startsWith("mysql_log_db"))
        {
-          host = line.section("'",3,3);
+          dBase = line.section(":",1,1);
        }
-       if (line.contains("mysql_log_db"))
-       {
-          dBase = line.section("'",3,3);
-       }
-
        if (line.contains("scenario_type"))
        {
           sType = line.section("'",3,3);
        }
-
     }
 
     user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
