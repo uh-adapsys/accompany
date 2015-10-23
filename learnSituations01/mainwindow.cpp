@@ -68,19 +68,19 @@ void MainWindow::setup()
 
        if (line.startsWith("mysql_log_user"))
        {
-          user = line.section(":",1,1);
+          user = line.section(":",1,1).trimmed();
        }
        if (line.startsWith("mysql_log_password"))
        {
-           pw = line.section(":",1,1);
+           pw = line.section(":",1,1).trimmed();
        }
        if (line.startsWith("mysql_log_server"))
        {
-          host = line.section(":",1,1);
+          host = line.section(":",1,1).trimmed();
        }
        if (line.startsWith("mysql_log_db"))
        {
-          dBase = line.section(":",1,1);
+          dBase = line.section(":",1,1).trimmed();
        }
     }
     qDebug()<<lv;
@@ -576,11 +576,11 @@ void MainWindow::on_ruleStatePushButton_clicked()
          QString sensorId           = query.value(0).toString();
          QString sensorStatus       = query.value(1).toString();
 
-         seQuery = "update tempState set sensor" + sensorId + " =  '" + sensorStatus + "'";
+         seqQuery = "update tempState set sensor" + sensorId + " =  '" + sensorStatus + "'";
 
          qDebug()<<seqQuery;
 
-         if (updQuery.exec(seq))
+         if (updQuery.exec(seqQuery))
          {
              QMessageBox msgBox;
              msgBox.setIcon(QMessageBox::Warning);
