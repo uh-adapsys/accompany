@@ -68,7 +68,7 @@ bool MainWindow::openDatabase()
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         closeDownRequest = true;
-        return;
+        return false;
     }
 
     QTextStream in(&file);
@@ -78,19 +78,19 @@ bool MainWindow::openDatabase()
 
        if (line.startsWith("mysql_log_user"))
        {
-          user = line.section(":",1,1);
+          user = line.section(":",1,1).trimmed();
        }
        if (line.startsWith("mysql_log_password"))
        {
-           pw = line.section(":",1,1);
+           pw = line.section(":",1,1).trimmed();
        }
        if (line.startsWith("mysql_log_server"))
        {
-          host = line.section(":",1,1);
+          host = line.section(":",1,1).trimmed();
        }
        if (line.startsWith("mysql_log_db"))
        {
-          dBase = line.section(":",1,1);
+          dBase = line.section(":",1,1).trimmed();
        }
     }
 
