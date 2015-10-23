@@ -24,8 +24,8 @@ class ROSLocationProcessor(PollingProcessor):
 
     def stop(self):
         print "Stopped polling uh locations"
-        self._addPollingProcessor('location_publish')
-        self._addPollingProcessor('sensor_publish')
+        self._removePollingProcessor('location_publish')
+        self._removePollingProcessor('sensor_publish')
 
     def checkUpdateLocations(self):
         locationData = self._locations.findLocations()
@@ -55,6 +55,7 @@ class ROSLocationProcessor(PollingProcessor):
                 'text': sensor['name'] or '',
                 'position': {'x': sensor['xCoord'] or 0, 'y': sensor['yCoord'] or 0},
                 'orientation': {'theta': math.radians(sensor['orientation'] or 0)},
+                'model': sensor['iconName'] or '',
                 'color': {'r': 0.25,
                           'g': 0.25,
                           'b': 0.25,
