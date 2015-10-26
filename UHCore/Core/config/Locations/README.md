@@ -6,7 +6,7 @@ The `sensors` element controls which sensors classes are loaded when sensors.py 
 The `map` element is used to control the conversion between map coordinates and svg image coordinates
 
 =======================================================================================================
-```
+```yaml
 UH Robot House:
   sensors:
   - type: ZigBee
@@ -31,7 +31,7 @@ UH Robot House:
       x: 81
       y: 245
     svg_rotation: -90
-    `pgm_ should match values defined in map.yaml from ros_nav`
+    # pgm_ should match values defined in map.yaml from ros_nav
     pgm_scale: 0.05
     pgm_offset:
       x: -8
