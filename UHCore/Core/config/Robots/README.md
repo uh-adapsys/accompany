@@ -1,15 +1,18 @@
 Controls various magic strings that are specific to individual robot models
 Structure is as follows:
 
+```
 Robot Name:
   componentName:
     positions:
       name: robot specific name or value
             I.E. `raised: deliverup` OR `raised: [[0.0, 1.57, 3.142]]`
       `...other component specific settings...`
+```
 
 
 Some component settings are:
+```
     tray:
         size: Activation range for the phidget sensors (COB Only)
     head:
@@ -23,9 +26,9 @@ Some component settings are:
         override: ROS_MASTER_URI used in robotFactory() constructor
                   I.E. COB3.2 default is built as cob3-2-pc1, if override is set to cob3_2_pc1
                   cob3_2_pc1 will be used instead
-
+```
 =======================================================================================================
-
+```
 Care-O-Bot 3.2:
   phidgets:
     topics:
@@ -49,3 +52,4 @@ Care-O-Bot 3.2:
         angle: 180
         distance: 90
         amount: 180
+```
