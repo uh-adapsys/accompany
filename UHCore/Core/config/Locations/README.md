@@ -5,6 +5,7 @@ The `sensors` element controls which sensors classes are loaded when sensors.py 
   
 The `map` element is used to control the conversion between map coordinates and svg image coordinates
 
+Example
 =======================================================================================================
 ```yaml
 UH Robot House:
