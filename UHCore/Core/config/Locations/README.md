@@ -1,10 +1,13 @@
-Contains configuration information for each experiment site 
+Configuration information for each experiment site
+
 The `sensors` element controls which sensors classes are loaded when sensors.py is run 
-  Configuration for each sensor type is shown below
+  Configuration for each sensor type is shown below.
+  
 The `map` element is used to control the conversion between map coordinates and svg image coordinates
 
+Example
 =======================================================================================================
-
+```yaml
 UH Robot House:
   sensors:
   - type: ZigBee
@@ -12,7 +15,7 @@ UH Robot House:
   - type: GEOSystem
     geo_server: geo-eee-pc
     geo_user: guest
-    geo_password: r0b0th0use##
+    geo_password: password
     geo_db: livewiredb
     geo_query: CALL expPower
   - type: ZigBeeDirect
@@ -29,8 +32,9 @@ UH Robot House:
       x: 81
       y: 245
     svg_rotation: -90
-    `pgm_ should match values defined in map.yaml from ros_nav`
+    # pgm_ should match values defined in map.yaml from ros_nav
     pgm_scale: 0.05
     pgm_offset:
       x: -8
       y: -19.2
+```

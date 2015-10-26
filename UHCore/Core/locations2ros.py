@@ -34,13 +34,18 @@ class ROSLocationProcessor(PollingProcessor):
             locations[location['locationId']] = {
                 'id': location['locationId'],
                 'text': location['name'] or '',
-                'position': {'x': location['xCoord'] or 0, 'y': location['yCoord'] or 0},
-                'orientation': {'theta': math.radians(location['orientation'] or 0)},
+                'position': {'x': location.get('xCoord', 0),
+                             'y': location.get('yCoord', 0),
+                             'z': location.get('zCoord', 0)},
                 'color': {'r': float(not location['ValidRobotLocation'] and not location['ValidUserLocation']),
                           'g': float(location['ValidRobotLocation'] or 0),
                           'b': float(location['ValidUserLocation'] or 0),
                           'a': 1.0}
             }
+            if location['orientation'] is not None:
+                locations[location['locationId']]['orientation'] = {
+                    'theta': math.radians(location['orientation'])
+                }
 
         if self._lastLocations != locations:
             self._lastLocations = locations
@@ -53,14 +58,20 @@ class ROSLocationProcessor(PollingProcessor):
             sensors[sensor['sensorId']] = {
                 'id': sensor['sensorId'],
                 'text': sensor['name'] or '',
-                'position': {'x': sensor['xCoord'] or 0, 'y': sensor['yCoord'] or 0},
-                'orientation': {'theta': math.radians(sensor['orientation'] or 0)},
+                'position': {'x': sensor.get('xCoord', 0),
+                             'y': sensor.get('yCoord', 0),
+                             'z': sensor.get('zCoord', 0)},
                 'model': sensor['iconName'] or '',
                 'color': {'r': 0,
                           'g': 0,
                           'b': 0,
                           'a': 0}
             }
+            if sensor['orientation'] is not None:
+                sensors[sensor['sensorId']]['orientation'] = {
+                    'theta': math.radians(sensor['orientation'])
+                }
+
             if sensor['isActive']:
                 sensors[sensor['sensorId']]['color']['r'] = 0
                 sensors[sensor['sensorId']]['color']['g'] = 1.0
