@@ -16,9 +16,10 @@ mysql_personas_table: Personas
 mysql_questions_table: userInterfaceGUI
 mysql_responses_table: userInterfaceGUI
 mysql_robot_table: Robot
+mysql_scenario_table: Scenarios
 mysql_sensor_table: Sensors
 mysql_sensorHistory_table: SensorHistory
-mysql_sensorIcon_table: SensorIconsmysql_scenario_table: Scenarios
+mysql_sensorIcon_table: SensorIcons
 mysql_sensorType_table: SensorType
 mysql_session_control_table: SessionControl
 mysql_user_preferences_table: UserPreferences
