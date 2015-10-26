@@ -28,6 +28,8 @@ Some component settings are:
                   # I.E. COB3.2 default is built as cob3-2-pc1, if override is set to cob3_2_pc1
                   # cob3_2_pc1 will be used instead
 ```
+
+Example
 =======================================================================================================
 ```yaml
 Care-O-Bot 3.2:
