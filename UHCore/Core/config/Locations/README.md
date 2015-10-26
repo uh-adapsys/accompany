@@ -15,7 +15,7 @@ UH Robot House:
   - type: GEOSystem
     geo_server: geo-eee-pc
     geo_user: guest
-    geo_password: r0b0th0use##
+    geo_password: password
     geo_db: livewiredb
     geo_query: CALL expPower
   - type: ZigBeeDirect
