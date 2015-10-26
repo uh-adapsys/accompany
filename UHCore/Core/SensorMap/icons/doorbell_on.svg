@@ -5,50 +5,45 @@
    height="21"
    version="1.1">
   <rect
-     style="fill:#ffffff;stroke:#000000;stroke-width:1;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     style="fill:#ffffff;stroke:#000000;stroke-width:1;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
      width="10"
      height="20"
-     x="0.5"
-     y="0.5"
-     id="rect4" />
+     x="-10"
+     y="11" />
   <rect
-     style="fill:#96ff4b;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     style="fill:#96ff4b;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
      width="3"
      height="8"
-     x="4"
-     y="6.5"/>
+     x="-6.5"
+     y="17" />
   <path
      style="fill:#96ff4b;fill-opacity:1;stroke:none"
-     d="m 14.059322,3.4258475 a 0.57838982,0.57838982 0 1 1 -1.15678,0 0.57838982,0.57838982 0 1 1 1.15678,0 z"
-     transform="matrix(1.0805861,0,0,1.0805861,-2.442308,6.6730768)" />
+     d="m 2.2499999,20.875 a 0.62500019,0.62500019 0 0 1 -1.25000036,0 0.62500019,0.62500019 0 1 1 1.25000036,0 z" />
   <path
-     style="fill:none;stroke:#96ff4b;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-     d="m 12.500001,10.25 0,-4.5175"/>
-  <path
-     style="fill:#96ff4b;fill-opacity:1;stroke:none"
-     d="m 14.059322,3.4258475 a 0.57838982,0.57838982 0 1 1 -1.15678,0 0.57838982,0.57838982 0 1 1 1.15678,0 z"
-     transform="matrix(1.0805861,0,0,1.0805861,0.55769201,5.9733946)" />
-  <path
-     style="fill:none;stroke:#96ff4b;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-     d="m 15.500001,9.75 0,-4.75" />
+     style="fill:none;stroke:#96ff4b;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="m 2.000001,20.75 0,-4.5175" />
   <path
      style="fill:#96ff4b;fill-opacity:1;stroke:none"
-     d="m 12.250001,5.5 3.5,-1 0,0.75 -3.5,1 z" />
+     d="m 5.2499999,20.175318 a 0.62500019,0.62500019 0 0 1 -1.2500004,0 0.62500019,0.62500019 0 1 1 1.2500004,0 z" />
+  <path
+     style="fill:none;stroke:#96ff4b;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="m 5.000001,20.25 0,-4.75" />
   <path
      style="fill:#96ff4b;fill-opacity:1;stroke:none"
-     d="m 14.059322,3.4258475 a 0.57838982,0.57838982 0 1 1 -1.15678,0 0.57838982,0.57838982 0 1 1 1.15678,0 z"
-     transform="matrix(1.0805861,0,0,1.0805861,2.057692,2.6730768)" />
-  <path
-     style="fill:none;stroke:#96ff4b;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-     d="m 17.000001,6.25 0,-4.5175002" />
+     d="m 1.750001,16 3.5,-1 0,0.75 -3.5,1 z" />
   <path
      style="fill:#96ff4b;fill-opacity:1;stroke:none"
-     d="m 14.059322,3.4258475 a 0.57838982,0.57838982 0 1 1 -1.15678,0 0.57838982,0.57838982 0 1 1 1.15678,0 z"
-     transform="matrix(1.0805861,0,0,1.0805861,5.057692,1.9733948)" />
+     d="m 6.7499999,16.875 a 0.62500019,0.62500019 0 0 1 -1.2500004,0 0.62500019,0.62500019 0 1 1 1.2500004,0 z" />
   <path
-     style="fill:none;stroke:#96ff4b;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-     d="m 20.000001,5.7499998 0,-4.75000003" />
+     style="fill:none;stroke:#96ff4b;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="m 6.500001,16.75 0,-4.5175" />
   <path
      style="fill:#96ff4b;fill-opacity:1;stroke:none"
-     d="m 16.750001,1.4999998 3.5,-1.00000003 0,0.75000003 -3.5,1 z" />
+     d="m 9.7499999,16.175318 a 0.62500019,0.62500019 0 0 1 -1.2500004,0 0.62500019,0.62500019 0 1 1 1.2500004,0 z" />
+  <path
+     style="fill:none;stroke:#96ff4b;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="m 9.500001,16.25 0,-4.75" />
+  <path
+     style="fill:#96ff4b;fill-opacity:1;stroke:none"
+     d="m 6.250001,12 3.5,-1 0,0.75 -3.5,1 z" />
 </svg>

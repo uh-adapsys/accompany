@@ -16,7 +16,7 @@ UH Robot House:
     svg_offset: 
       x: 81
       y: 245
-    svg_rotation: -90
+    svg_rotation: 90
     pgm_scale: 0.05
     pgm_offset:
       x: -8

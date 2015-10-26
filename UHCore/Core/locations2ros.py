@@ -56,15 +56,16 @@ class ROSLocationProcessor(PollingProcessor):
                 'position': {'x': sensor['xCoord'] or 0, 'y': sensor['yCoord'] or 0},
                 'orientation': {'theta': math.radians(sensor['orientation'] or 0)},
                 'model': sensor['iconName'] or '',
-                'color': {'r': 0.25,
-                          'g': 0.25,
-                          'b': 0.25,
-                          'a': 1.0}
+                'color': {'r': 0,
+                          'g': 0,
+                          'b': 0,
+                          'a': 0}
             }
             if sensor['isActive']:
                 sensors[sensor['sensorId']]['color']['r'] = 0
                 sensors[sensor['sensorId']]['color']['g'] = 1.0
                 sensors[sensor['sensorId']]['color']['b'] = 0
+                sensors[sensor['sensorId']]['color']['a'] = 1.0
 
             if not sensor['xCoord'] and not sensor['yCoord']:
                 sensors[sensor['sensorId']]['position']['z'] = -1
