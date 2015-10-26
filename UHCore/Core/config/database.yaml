@@ -1,26 +1,26 @@
 # Database configurations
 # The settings for the channel logging MySQL server / database / table
 mysql_log_server: localhost
+mysql_log_db: LiverpoolTestDB
 mysql_log_user: rhUser
 mysql_log_password: waterloo
-mysql_log_db: LiverpoolTestDB
 
 # Table names (should probably be deprecated and hard-coded into dataAccess.py)
-mysql_log_table: SensorLog
+mysql_experimentLocations_table: ExperimentalLocation
 mysql_history_table: ActionHistory
-mysql_scenario_table: Scenarios
-mysql_sensorHistory_table: SensorHistory
-mysql_sensorType_table: SensorType
-mysql_sensor_table: Sensors
-mysql_location_table: Locations
-mysql_robot_table: Robot
 mysql_image_table: Images
 mysql_imageoverhead_table: ImagesOverhead
+mysql_location_table: Locations
+mysql_log_table: SensorLog
+mysql_personas_table: Personas
 mysql_questions_table: userInterfaceGUI
 mysql_responses_table: userInterfaceGUI
-mysql_users_table: Users
-mysql_user_preferences_table: UserPreferences
-mysql_personas_table: Personas
-mysql_experimentLocations_table: ExperimentalLocation
+mysql_robot_table: Robot
+mysql_sensor_table: Sensors
+mysql_sensorHistory_table: SensorHistory
+mysql_sensorIcon_table: SensorIconsmysql_scenario_table: Scenarios
+mysql_sensorType_table: SensorType
 mysql_session_control_table: SessionControl
-mysql_sensorIcon_table: SensorIcons
+mysql_user_preferences_table: UserPreferences
+mysql_users_table: Users
+
