@@ -19,11 +19,14 @@ locn::locn(QString txt,qreal x, qreal y, qreal sceneWidth, qreal sceneHeight, qr
     setZValue(1);
 
     displayOrientation = convertOrientation(orientation);
-    originalOrientation = orientation;
+    originalOrientation = displayOrientation;
+
+    qDebug()<<txt<<" "<<displayOrientation;
 
     if (oEnabled)
     {
-        setRotation(displayOrientation);
+
+        setRotation(180 - displayOrientation);
     }
     else
     {
@@ -142,44 +145,61 @@ void locn::wheelEvent(QGraphicsSceneWheelEvent *event)
     {
         if (event->delta() > 0)
         {
-            rotate(+1);
-            displayOrientation+=1;
-            if (originalOrientation > 0 || originalOrientation < 0)
-            {
-                originalOrientation-=1;
-            }
-            else  // it is zero
-            {
-                originalOrientation = 179;
-            }
-
-        }
-        else
-        {
             rotate(-1);
-            displayOrientation-=1;
-            if (originalOrientation > 0 || originalOrientation < 0)
+            displayOrientation+=1;
+            if (displayOrientation >= 360)
             {
-                originalOrientation+=1;
-
+                displayOrientation -= 360;
             }
-            else
-            {
-               originalOrientation = -179;
-            }
-        }
 
-        if (originalOrientation > 180 )
-        {
-            originalOrientation -= 360;
+            originalOrientation = displayOrientation;
+
+     //       if (originalOrientation > 0 || originalOrientation < 0)
+     //       {
+     //           originalOrientation-=1;
+     //       }
+     //       else  // it is zero
+     //       {
+     //           originalOrientation = 179;
+     //       }
+
         }
         else
         {
-            if (originalOrientation < -180 )
+            rotate(+1);
+            displayOrientation-=1;
+
+            if (displayOrientation == -1)
             {
-                originalOrientation += 360;
+                displayOrientation = 359;
             }
+
+            originalOrientation = displayOrientation;
+
+
+
+     //       if (originalOrientation > 0 || originalOrientation < 0)
+     //       {
+     //           originalOrientation+=1;
+//
+  //          }
+    //        else
+      //      {
+        //       originalOrientation = -179;
+        //    }
         }
+
+   //     if (originalOrientation > 180 )
+   //     {
+   //         originalOrientation -= 360;
+   //     }
+   //     else
+   //     {
+   //         if (originalOrientation < -180 )
+   //         {
+   //             originalOrientation += 360;
+   //         }
+   //     }
 
 
         setPlainText(makeText(toPlainText().section(" (",0,0),true,originalOrientation));
@@ -230,6 +250,15 @@ void locn::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 
 qreal locn::convertOrientation(qreal orientation)
 {
+
+    while (orientation <= 0)
+    {
+        orientation += 360;
+    }
+
+    return orientation;
+
+    /*
     // assumes rotation angle from robot between -180 to 0 to + 180
 
     if (orientation > 0 && orientation < 91)            // 1 to 90
@@ -253,6 +282,8 @@ qreal locn::convertOrientation(qreal orientation)
     }
 
     // 0 remains unchanged
+    */
+
 }
 
 
