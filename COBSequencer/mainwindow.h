@@ -69,7 +69,7 @@ private slots:
     void on_GUI2CheckBox_clicked(bool checked);
     void on_GUI1CheckBox_clicked(bool checked);
     void on_robotGUI_toggled(bool checked);
-    void on_moveRobotComboBox_currentIndexChanged(QString );
+//    void on_moveRobotComboBox_currentIndexChanged(QString );
     void on_scheduleCheckBox_clicked();
     void on_SmallCupboardDoorTopCheckBox_toggled(bool checked);
     void on_SmallCupboardDoorMiddleCheckBox_toggled(bool checked);

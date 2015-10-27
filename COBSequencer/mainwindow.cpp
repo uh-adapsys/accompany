@@ -1973,16 +1973,16 @@ qDebug()<<locQuery;
          q1 = q2 = q3 = "";
 
          int rows=0;
-         int orientation = 0;
+  //       int orientation = 0;
 
          while(query.next())
          {
              rows++;
 
-             if (rows == 1)
-             {
-               orientation =  query.value(7).toInt();
-             }
+   //          if (rows == 1)
+   //          {
+   //            orientation =  query.value(7).toInt();
+   //          }
 
              q1 = q2 = q3 = "";
 
@@ -2013,7 +2013,7 @@ qDebug()<<locQuery;
              ui->moveRobotComboBox->addItem( "::" + query.value(0).toString() + ":: " + query.value(3).toString() + q1 + q2 );
          }
 
-        ui->moveRobotSpinBox->setValue(orientation);
+   //     ui->moveRobotSpinBox->setValue(orientation);
 
         actionCount++;
      }
@@ -2079,12 +2079,14 @@ void MainWindow::on_addActionButton_clicked()
            }
            else
            {
+          // removed orientation setting from GUI
+
           //     double orient = ui->moveRobotSpinBox->value()/180.0 * 3.142;
                QString s;
-               QString orientation;
+          //     QString orientation;
           //     orientation.setNum(orient);
-               orientation.setNum(ui->moveRobotSpinBox->value());  //save to DB in degrees
-               s = "[" + query.value(1).toString() + ":" + query.value(2).toString() + ":" + orientation + "]";
+          //     orientation.setNum(ui->moveRobotSpinBox->value());  //save to DB in degrees
+               s = "[" + query.value(1).toString() + ":" + query.value(2).toString() + ":" + query.value(3).toString() + "]";
 
                action = "base," + ui->robotComboBox->currentText().section("::", 1, 1) + "," + s + "," + ui->moveRobotComboBox->currentText().section("::", 1, 1);
 
@@ -4268,34 +4270,36 @@ void MainWindow::on_scheduleCheckBox_clicked()
 
 }
 
-void MainWindow::on_moveRobotComboBox_currentIndexChanged(QString str )
-{
+// Removed orientation fom GUI
 
-    QSqlQuery query("SELECT locationId, orientation FROM Locations where locationId = " + str.section("::", 1, 1));
-
-    int rows = 0;
-    while(query.next())
-    {
-        rows++;
-
-        if ( query.value(0).toString() != ui->moveRobotComboBox->currentText().section("::", 1, 1) || rows > 1)
-        {
-            QMessageBox msgBox;
-            msgBox.setIcon(QMessageBox::Warning);
-
-            msgBox.setText("Error on query to location table!");
-            msgBox.exec();
-            return;
-        }
-        else
-        {
-            ui->moveRobotSpinBox->setValue(query.value(1).toInt());
-        }
-
-
-    }
-
-}
+//void MainWindow::on_moveRobotComboBox_currentIndexChanged(QString str )
+//{
+//
+//    QSqlQuery query("SELECT locationId, orientation FROM Locations where locationId = " + str.section("::", 1, 1));
+//
+//    int rows = 0;
+//    while(query.next())
+//    {
+//        rows++;
+//
+//        if ( query.value(0).toString() != ui->moveRobotComboBox->currentText().section("::", 1, 1) || rows > 1)
+//        {
+//            QMessageBox msgBox;
+//            msgBox.setIcon(QMessageBox::Warning);
+//
+//            msgBox.setText("Error on query to location table!");
+//            msgBox.exec();
+//            return;
+//        }
+//        else
+//        {
+//            ui->moveRobotSpinBox->setValue(query.value(1).toInt());
+//        }
+//
+//
+//    }
+//
+//}
 
 
 void MainWindow::on_robotGUI_toggled(bool checked)
