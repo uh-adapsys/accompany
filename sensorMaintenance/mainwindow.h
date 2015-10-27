@@ -26,7 +26,6 @@ public:
 private slots:
     void on_sensorComboBox_activated(const QString &arg1);
 
-    void on_sensorComboBox_editTextChanged(const QString &arg1);
     void fillLocationComboBox(int locnId);
     void fillAccessPointComboBox(int accessPoint);
     void fillSensorTypeComboBox(int sensorType);
@@ -41,6 +40,8 @@ private slots:
     void on_pushButton_clicked();
 
     void on_addPushButton_clicked();
+
+    QString capitaliseFirstLetter(QString srg);
 
 private:
     Ui::MainWindow *ui;

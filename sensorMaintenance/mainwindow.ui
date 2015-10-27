@@ -393,6 +393,9 @@
       <height>24</height>
      </rect>
     </property>
+    <property name="minimum">
+     <double>-360.000000000000000</double>
+    </property>
     <property name="maximum">
      <double>360.000000000000000</double>
     </property>
@@ -409,6 +412,9 @@
       <height>24</height>
      </rect>
     </property>
+    <property name="minimum">
+     <double>-360.000000000000000</double>
+    </property>
     <property name="maximum">
      <double>360.000000000000000</double>
     </property>
@@ -424,6 +430,9 @@
       <width>62</width>
       <height>24</height>
      </rect>
+    </property>
+    <property name="minimum">
+     <double>-360.000000000000000</double>
     </property>
     <property name="maximum">
      <double>360.000000000000000</double>
