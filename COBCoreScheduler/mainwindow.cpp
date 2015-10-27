@@ -1231,7 +1231,8 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
 
             */
 
-            // logic for base is: send x,y,theta from db location, if theta spec'ed by user use that
+            // logic for base is: send x,y,theta from latest db location
+            // only use the one set up on sequencer if db row is missing
             // if go to user (999) send string "userLocation" and let the context system sort it out.
             if (cname == "base")
             {
@@ -1304,11 +1305,13 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
                             {
                                 pos.at(0) = locationQuery.value(0).toDouble();
                                 pos.at(1) = locationQuery.value(1).toDouble();
-                                pos.at(2) = radians;
+                                pos.at(2) = locationQuery.value(1).toDouble()/ 180.0 * 3.142;
                             }
                         }
                         else
                         {
+                            // this would only happen if the location on the DB had disappeared
+
                             qDebug() << "Location query failed - using user given location vector";
                         }
 

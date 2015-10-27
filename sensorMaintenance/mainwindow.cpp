@@ -329,13 +329,6 @@ void MainWindow::on_sensorComboBox_activated(const QString &arg1)
 
 }
 
-void MainWindow::on_sensorComboBox_editTextChanged(const QString &arg1)
-{
- //   ui->changePushButton->setEnabled(false);
- //   ui->delPushButton->setEnabled(false);
-
-}
-
 
 
 void MainWindow::fillLocationComboBox(int locnId)
@@ -537,8 +530,8 @@ bool MainWindow::updateSensor()
 
     query.bindValue(":id",ui->sensorComboBox->currentText().section("::",1,1));
     query.bindValue(":locationId",ui->locnComboBox->currentText().section("::",1,1));
-    query.bindValue(":value",ui->valuePlainTextEdit->toPlainText().trimmed());
-    query.bindValue(":lastActiveValue",ui->prevValuePlainTextEdit->toPlainText().trimmed());
+    query.bindValue(":value",capitaliseFirstLetter(ui->valuePlainTextEdit->toPlainText().trimmed()));
+    query.bindValue(":lastActiveValue",capitaliseFirstLetter(ui->prevValuePlainTextEdit->toPlainText().trimmed()));
     query.bindValue(":name",ui->namePlainTextEdit->toPlainText().trimmed());
     query.bindValue(":sensorAccessPointID",ui->accessPointComboBox->currentText().section("::",1,1));
     query.bindValue(":sensorRule",ui->ruleComboBox->currentText());
@@ -570,7 +563,15 @@ bool MainWindow::updateSensor()
     return true;
 }
 
-
+QString MainWindow::capitaliseFirstLetter(QString srg)
+{
+    QString upper = srg;
+    if (upper[0].isLetter())
+    {
+        upper[0] = upper.at(0).toTitleCase();
+    }
+    return upper;
+}
 
 void MainWindow::on_delPushButton_clicked()
 {
@@ -759,8 +760,8 @@ void MainWindow::on_addPushButton_clicked()
     id.setNum(ui->idSpinBox->value());
     query.bindValue(":sensorId",id);
     query.bindValue(":locationId",ui->locnComboBox->currentText().section("::",1,1));
-    query.bindValue(":value",ui->valuePlainTextEdit->toPlainText().trimmed());
-    query.bindValue(":lastActiveValue",ui->prevValuePlainTextEdit->toPlainText().trimmed());
+    query.bindValue(":value",capitaliseFirstLetter(ui->valuePlainTextEdit->toPlainText().trimmed()));
+    query.bindValue(":lastActiveValue",capitaliseFirstLetter(ui->prevValuePlainTextEdit->toPlainText().trimmed()));
     query.bindValue(":name",ui->namePlainTextEdit->toPlainText().trimmed());
     query.bindValue(":sensorAccessPointID",ui->accessPointComboBox->currentText().section("::",1,1));
     query.bindValue(":sensorRule",ui->ruleComboBox->currentText());
@@ -768,8 +769,8 @@ void MainWindow::on_addPushButton_clicked()
     query.bindValue(":sensorTypeId",ui->sensorTypeComboBox->currentText().section("::",1,1));
     query.bindValue(":lastUpdate",ui->currentDateTimeEdit->dateTime().toString(Qt::ISODate));
     query.bindValue(":lastTimeActive",ui->prevDateTimeEdit->dateTime().toString(Qt::ISODate));
-    query.bindValue(":status",ui->statusPlainTextEdit->toPlainText().trimmed());
-    query.bindValue(":lastStatus",ui->prevStatusPlainTextEdit->toPlainText().trimmed());
+    query.bindValue(":status",capitaliseFirstLetter(ui->statusPlainTextEdit->toPlainText().trimmed()));
+    query.bindValue(":lastStatus",capitaliseFirstLetter(ui->prevStatusPlainTextEdit->toPlainText().trimmed()));
     query.bindValue(":xCoord",ui->xSpinBox->value());
     query.bindValue(":yCoord",ui->ySpinBox->value());
     query.bindValue(":orientation",ui->oSpinBox->value());
