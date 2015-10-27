@@ -113,19 +113,19 @@ class MapProcessor(object):
                     state = element['on']
             except:
                 state = False
-            (x, y, d) = cc.toSensorMap((element['xCoord'], element['yCoord'], element['orientation']))
+            (x, y, d) = cc.toScaled((element['xCoord'], element['yCoord'], element['orientation']))
             (img, height, width) = self.getIcon(element['icon'], element['name'], state)
 
-            # y is reversed for translation, seems that way at least
+            # svg y is from bottom corner
             My = mapHeight - y
             # be sure to translate first, which changes the local coordinate space to the group object
-            # which is important for the rotation about the centre
+            # which is important for the rotation about the center
             transform = "translate(%(x)s, %(y)s) rotate(%(rotate)s, %(xCenter)s, %(yCenter)s)" % {
                 'x': x,
                 'y': My,
                 'rotate': d,
-                'xCenter': (width / 2),
-                'yCenter': (height / 2)
+                'xCenter': 0,
+                'yCenter': 0
             }
 
             img.attrib['transform'] = transform
@@ -150,86 +150,33 @@ class CoordinateConvertor(object):
     """Convert between ROS MAP and SVG MAP coordinate systems"""
 
     def __init__(self, transform):
-        # This could be solved and combined into a single transformation,
-        # but I left it this way so any changes to an individual transform could be
-        # easily corrected for
-        self._sensorMapToRHMapScale = transform['svg_scale']
-        self._sensorMapToRHMapOffset = transform['svg_offset']  # in sensorMapUnits
-        self._sensorMapToRHLocRotation = transform['svg_rotation']
+        self._scale = float(transform['svg_scale'])
+        self._offset = transform['svg_offset']  # in sensorMapUnits
+        self._rotation = transform['svg_rotation']
+        self._rotation_direction = transform.get('svg_rotation_direction', -1)
 
-        # from the map.yaml file, combining these gets from real world coordinates to pgm pixels
-        self._RHMapToRHLocScale = transform['pgm_scale']
-        self._RHMapToRHLocOffset = transform['pgm_offset']
-
-    def toRobotHouse(self, (Mx, My, Mr)):
-        """x and y are in sensor map pixels"""
-        """r is assumed in degrees, use d or r suffix to use others (90d/3.14r)"""
-
-        # Defaults for missing values
-        Mx = Mx or 0
-        My = My or 0
-        Mr = Mr or 0
-
-        # (px*s)+cx if cx in final units
-        # (px+cx)*s if cx in original units
-        Rx = (Mx * self._sensorMapToRHMapScale) + self._sensorMapToRHMapOffset['x']
-        Ry = (My * self._sensorMapToRHMapScale) + self._sensorMapToRHMapOffset['y']
-        RHx = (Rx * self._RHMapToRHLocScale) + self._RHMapToRHLocOffset['x']
-        RHy = (Ry * self._RHMapToRHLocScale) + self._RHMapToRHLocOffset['y']
-
-        RHr = None
-        if type(Mr) == str:
-            if Mr.endswith('r'):
-                Mr = RHr.strip('r')
-
-            if Mr.endswith('d'):
-                RHr = float(RHr.strip('d'))
-
-        if RHr is None:
-            try:
-                RHr = math.radians(Mr + self._sensorMapToRHLocRotation)
-            except:
-                RHr = None
-
-        return (RHx, RHy, RHr)
-
-    def toSensorMap(self, (RHx, RHy, RHr)):
+    def toScaled(self, (x, y, theta)):
         """x and y are in meters"""
         """r is assumed in radians, use d or r suffix to use others (90d/3.14r)"""
 
         # Defaults for missing values
-        RHx = RHx or 0
-        RHy = RHy or 0
-        RHr = RHr or 0
+        x = x or 0
+        y = y or 0
+        theta = theta or 0
 
-        # convert from real world to PGM
-        # (x - -8) / 0.05, (y - -19.2) / 0.05
-
-        # convert from PGM to SVG
-        # (x / 0.275) - 295, (y / 0.275) - 505
-
-        Rx = (RHx - self._RHMapToRHLocOffset['x']) / self._RHMapToRHLocScale
-        Ry = (RHy - self._RHMapToRHLocOffset['y']) / self._RHMapToRHLocScale
-        Mx = (Rx - self._sensorMapToRHMapOffset['x']) / self._sensorMapToRHMapScale
-        My = (Ry - self._sensorMapToRHMapOffset['y']) / self._sensorMapToRHMapScale
-        RHr = str(RHr).lower()
-        Mr = None
-        if type(RHr) == str:
+        scaledX = (x * self._scale) + self._offset['x']
+        scaledY = (y * self._scale) + self._offset['y']
+        
+        scaledTheta = None
+        if type(theta) == str:
             try:
-                if RHr.endswith('r'):
-                    Mr = math.degrees(float(RHr.strip('r')))
-                if RHr.endswith('d'):
-                    Mr = float(RHr.strip('d'))
+                if theta.endswith('r'):
+                    scaledTheta = math.degrees(float(theta.strip('r')))
+                if theta.endswith('d'):
+                    scaledTheta = float(theta.strip('d'))
             except:
-                Mr = 0
+                scaledTheta = 0
 
-        Mr = Mr * -1  # svg rotates opposite of our cooridnate system
-        Mr = Mr - self._sensorMapToRHLocRotation
-        return (Mx, My, Mr)
-
-if __name__ == '__main__':
-    cc = CoordinateConvertor()
-    senLoc = cc.toSensorMap((0, 0, math.pi / 2))
-    print senLoc
-    rhLoc = cc.toRobotHouse(senLoc)
-    print rhLoc
+        scaledTheta = scaledTheta * self._rotation_direction
+        scaledTheta = scaledTheta - self._rotation
+        return (scaledX, scaledY, scaledTheta)

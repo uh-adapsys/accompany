@@ -181,27 +181,6 @@ class StateResolver(object):
 
             dao.saveData(sql, args)
 
-    def _alterMetaData(self):
-        """ No longer used, converted SVG coords into RH coords """
-        from xml.etree import ElementTree as et
-        from SensorMap.processor import CoordinateConvertor
-        import os
-        import math
-        cc = CoordinateConvertor()
-        sensors = et.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sensor_metadata.xml.bak'))
-        for sensor in sensors.getroot().findall("./sensor"):
-            x = float(sensor.get('x', 0))
-            y = 728 - float(sensor.get('y', 0))
-            d = float(sensor.get('direction', 0))
-            (x, y, d) = cc.toRobotHouse((x, y, d))
-            sensor.attrib['x'] = str(x)
-            sensor.attrib['y'] = str(y)
-            d = math.degrees(d)
-            d = d % 360
-            sensor.attrib['direction'] = str(d)
-
-        sensors.write('sensor_metadata.xml')
-
 if __name__ == '__main__':
     s = StateResolver()
     s._importMetaData()
