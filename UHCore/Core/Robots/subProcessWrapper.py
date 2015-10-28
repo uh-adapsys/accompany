@@ -26,7 +26,6 @@ class SubProcessWrapper(object):
         proc.daemon = True
         proc.start()
         d= startEvent.get()
-        print "Loaded..."
         object.__setattr__(self, '_wrapped_dict_', d)
     
     def __del__(self):
@@ -39,7 +38,6 @@ class SubProcessWrapper(object):
         #    return object.__getattribute__(self, name)
         #if name in object.__getattribute__(self, '_wrapped_dict_'):
         def wrappedFunc(*args, **kwargs):
-            print "Getting %s remote" % name
             msg = {'name': name, 'args':args, 'kwargs':kwargs}
             return object.__getattribute__(self, '_send')(msg)
         if object.__getattribute__(self, '_wrapped_dict_')[name].endswith('method'):
@@ -51,28 +49,7 @@ class SubProcessWrapper(object):
         # everything inside here is run in a separate process space
         try:
             for importStatement in classData['imports']:
-                if importStatement.startswith('import '):
-                    for namespace in importStatement[7:].split(','):
-                        globals()[namespace.strip()] = __import__(namespace.strip(), globals(), locals())
-                elif importStatement.startswith('from '):
-                    # from time import sleep
-                    # from time import sleep, clock as ticker
-                    namespace = importStatement[5: importStatement.index(' ', 5)]
-                    fromlist = importStatement[importStatement.index(' ', 5) + 7:].strip()
-                    for item in fromlist.split(','):
-                        if item.strip() == '':
-                            continue
-                        if ' as ' in item:
-                            itemName = item[:item.index(' as ')].strip()
-                            asName = item[item.index(' as ') + 3:].strip()
-                            temp = __import__(namespace, globals(), locals(), [itemName])
-                            globals()[asName] = getattr(temp, itemName)
-                        else:
-                            temp = __import__(namespace, globals(), locals(), [item])
-                            attr = getattr(temp, item)
-                            globals()[item] = attr
-                else:
-                    raise ValueError("Unknown import statement '%s'" % importStatement)
+                exec(importStatement, globals())
         except Exception as e:
             print >> sys.stderr, "%s\n%s" % (e, traceback.format_exc(e))
             recvPipe.send(e)
@@ -80,9 +57,14 @@ class SubProcessWrapper(object):
         
         if classData['name'] in globals():
             classInstance = globals()[classData['name']](*classData['args'], **classData['kwargs'])
-            wrappedDict = dict([(k, 
-                                 type(getattr(type(classInstance), k)).__name__) 
-                                 for k, v in inspect.getmembers(classInstance)])
+            wrappedDict = {}
+            for k, v in inspect.getmembers(classInstance):
+                if k.startswith('__'):
+                    continue
+                elif hasattr(type(classInstance), k):
+                    wrappedDict[k] = type(getattr(type(classInstance), k)).__name__
+                else:
+                    wrappedDict[k] = type(getattr(classInstance, k)).__name__
             startEvent.put(wrappedDict)
         else:
             raise ValueError("Unable to create class %s in from current imports" % (classData['name'], ))

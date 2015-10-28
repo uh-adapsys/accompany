@@ -29,7 +29,7 @@ class Factory(object):
         return None
 
     @staticmethod
-    def getRobot(robotName=None, spawn=False):
+    def getRobot(robotName=None, spawn=True):
         """ Retrieves the named robot type from the database and constructs the appropriate class """
         """ if robotName is None or Empty, acts like getCurrentRobot() """
         if robotName == None or robotName == '':
@@ -77,7 +77,6 @@ class Factory(object):
             else:
                 for import_ in imports:
                     exec(import_, globals())
-                print globals().keys()
                 robot = globals()[className](*args, **kwargs)
         elif robotName.lower().startswith('dummy'):
             import dummy
@@ -86,7 +85,7 @@ class Factory(object):
             print >> sys.stderr, "Unknown robot %s" % robotName
             return None
 
-        print "Finished building class %s" % robot.__class__.__name__
+        print "Finished building class %s" % className
         return robot
 
 if __name__ == '__main__':

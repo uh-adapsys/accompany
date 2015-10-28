@@ -29,17 +29,20 @@ class PoseUpdater(PollingProcessor):
     def __init__(self, robot):
         super(PoseUpdater, self).__init__()
         self._robot = robot
+        self._robotName = robot.name
+        self._pollerName = 'pose ' + robot.name
         self._sensors = Sensors().findSensors(None, False)
         self._channels = {}
         self._warned = []
     
     def start(self):
         print "Started polling pose for %s" % (self._robot.name)
-        self._addPollingProcessor('pose ' + self._robot.name, self.checkUpdatePose, (self._robot,), .25)
+        self._addPollingProcessor(self._pollerName, self.checkUpdatePose, (self._robot,), .25)
     
-    def stop(self):        
-        print "Stopped polling pose for %s" % (self._robot.name)
-        self._removePollingProcessor('pose ' + self._robot.name)
+    def stop(self):
+        if self._robot:
+            print "Stopped polling pose for %s" % (self._robotName, )
+            self._removePollingProcessor(self._pollerName)
     
     def updateStates(self, states):
         """ Iterates the states list and adds the values to the _channels dict in the standard format """
