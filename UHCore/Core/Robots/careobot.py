@@ -16,7 +16,6 @@ class CareOBot(robot.ROSRobot):
         rosHelper.ROS.configureROS(rosMaster=rosMaster)
         topic = robot_config.get(name, {}).get('head', {}).get('camera', {}).get('topic', 'camera')
         super(CareOBot, self).__init__(name, ActionLib, 'script_server', topic)
-        #super(CareOBot, self).__init__(name, ScriptServer, 'script_server', robot_config[name]['head']['camera']['topic'])
                
     def getCameraAngle(self):
         "Return the vertical component of the camera angle, used by getImage for rotating the image when needed"

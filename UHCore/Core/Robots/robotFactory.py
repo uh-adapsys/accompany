@@ -29,7 +29,7 @@ class Factory(object):
         return None
 
     @staticmethod
-    def getRobot(robotName=None, spawn=True):
+    def getRobot(robotName=None, spawn=False):
         """ Retrieves the named robot type from the database and constructs the appropriate class """
         """ if robotName is None or Empty, acts like getCurrentRobot() """
         if robotName == None or robotName == '':
@@ -76,7 +76,8 @@ class Factory(object):
                 os.environ['LD_LIBRARY_PATH'] = curLD
             else:
                 for import_ in imports:
-                    exec(import_)
+                    exec(import_, globals())
+                print globals().keys()
                 robot = globals()[className](*args, **kwargs)
         elif robotName.lower().startswith('dummy'):
             import dummy

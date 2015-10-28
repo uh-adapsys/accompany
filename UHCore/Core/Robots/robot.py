@@ -100,6 +100,9 @@ class Robot(object):
     @property
     def name(self):
         return self._name
+
+    def getName(self):
+        return self._name
     
     def getPID(self):
         return os.getpid()

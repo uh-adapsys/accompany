@@ -88,7 +88,7 @@ class ROS(object):
                 print >> sys.stderr, "Unable to connect to ros parameter server, Error: %s" % repr(e)
                 return []
 
-    def getParam(self, paramName, retry=5):
+    def getParam(self, paramName, default={}, retry=5):
         """ Return the value of a param on the parameter server, equivalent to rosparam 'paramName' """
         """ Default to retry 5 times on failure, this was added due to seemingly fleeting connection """
         """     problems with the rosparam server """
@@ -100,10 +100,12 @@ class ROS(object):
                     return self.getParam(paramName, retry - 1)
                 else:
                     print >> sys.stderr, "Unable to connect to ros parameter server, Timeout sending request"
-                    return []
+                    return default
+            except KeyError:
+                return default
             except Exception as e:
                 print >> sys.stderr, "Unable to connect to ros parameter server, Error: %s" % repr(e)
-                return []
+                return default
 
     def getTopics(self, baseFilter='', exactMatch=False, retry=10):
         """ topics = self._rospy.get_published_topics(baseFilter) """

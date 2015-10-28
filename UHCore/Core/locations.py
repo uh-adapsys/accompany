@@ -65,7 +65,11 @@ class RobotLocationProcessor(LocationProcessor):
         else:
             self._robot = robot
 
-        robId = self._dao.getRobotByName(self._robot.name)['robotId']
+        robot = self._dao.getRobotByName(self._robot.name)
+        if robot:
+                robId = robot['robotId']
+        else:
+            raise ValueError("Error retrieving %s from the database" % self._robot.name)
         self._targetName = self._robot.name
         self._storedLoc = lambda: self._dao.getRobot(robId)
         self._curLoc = lambda: self._robot.getLocation(False)        

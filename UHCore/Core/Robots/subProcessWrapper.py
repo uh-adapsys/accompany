@@ -1,38 +1,56 @@
-from multiprocessing import Process, Pipe, RLock
+from multiprocessing import Process, Pipe, RLock, Queue
+import inspect
 import sys
 import traceback
 
-class SubProcessWrapper(Process):
+class SubProcessWrapper(object):
     def __init__(self, imports, className, *args, **kwargs):
         super(SubProcessWrapper, self).__init__()
-        self._sendPipe, self._recvPipe = Pipe()
-        self._class = {
+        sendPipe, recvPipe = Pipe()
+	object.__setattr__(self, '_sendPipe', sendPipe)
+	object.__setattr__(self, '_recvPipe', recvPipe)
+        object.__setattr__(self, '_pipeLock', RLock())
+        object.__setattr__(self, '_wrapped_dict_', {})
+        classData = {
                        'imports': imports,
                        'name': className,
                        'args': args,
                        'kwargs': kwargs
                        }
-        self._pipeLock = RLock()
-        self._stop = False
-        self.daemon = True
-        Process.start(self)
+
+        startEvent = Queue()
+	object.__setattr__(self, '_startEvent', startEvent)
+        run = object.__getattribute__(self, '_run')
+        proc = Process(target=run, args=(recvPipe, classData, startEvent))
+        object.__setattr__(self, '_subprocess', proc)
+        proc.daemon = True
+        proc.start()
+        d= startEvent.get()
+        print "Loaded..."
+        object.__setattr__(self, '_wrapped_dict_', d)
     
     def __del__(self):
-        self._sendPipe.close()
-        self._recvPipe.close()
-        
-    def __getattr__(self, name):
-        if name in object.__getattribute__(self, '__dict__'):
-            return object.__getattribute__(self, name)
+        object.__getattribute__(self, '_sendPipe').close()
+        object.__getattribute__(self, '_recvPipe').close()
+
+    def __getattribute__(self, name):
+        #if name[:1] == '_':
+        #    print "Getting %s locally" % name
+        #    return object.__getattribute__(self, name)
+        #if name in object.__getattribute__(self, '_wrapped_dict_'):
         def wrappedFunc(*args, **kwargs):
+            print "Getting %s remote" % name
             msg = {'name': name, 'args':args, 'kwargs':kwargs}
             return object.__getattribute__(self, '_send')(msg)
-        return wrappedFunc
-    
-    def run(self):
+        if object.__getattribute__(self, '_wrapped_dict_')[name].endswith('method'):
+            return wrappedFunc
+        else:
+            return wrappedFunc()
+        
+    def _run(self, recvPipe, classData, startEvent):
         # everything inside here is run in a separate process space
         try:
-            for importStatement in self._class['imports']:
+            for importStatement in classData['imports']:
                 if importStatement.startswith('import '):
                     for namespace in importStatement[7:].split(','):
                         globals()[namespace.strip()] = __import__(namespace.strip(), globals(), locals())
@@ -57,38 +75,48 @@ class SubProcessWrapper(Process):
                     raise ValueError("Unknown import statement '%s'" % importStatement)
         except Exception as e:
             print >> sys.stderr, "%s\n%s" % (e, traceback.format_exc(e))
-            self._recvPipe.send(e)
+            recvPipe.send(e)
             return
         
-        if self._class['name'] in globals():
-            classInstance = globals()[self._class['name']](*self._class['args'], **self._class['kwargs'])
+        if classData['name'] in globals():
+            classInstance = globals()[classData['name']](*classData['args'], **classData['kwargs'])
+            wrappedDict = dict([(k, 
+                                 type(getattr(type(classInstance), k)).__name__) 
+                                 for k, v in inspect.getmembers(classInstance)])
+            startEvent.put(wrappedDict)
         else:
-            raise ValueError("Unable to create class %s in from current imports" % (self._class['name'], ))
+            raise ValueError("Unable to create class %s in from current imports" % (classData['name'], ))
         while True:
             try:
-                msg = self._recvPipe.recv()
+                msg = recvPipe.recv()
             except EOFError:
                 break
             except KeyboardInterrupt:
                 break
             
             if not hasattr(classInstance, msg['name']):
-                ret = AttributeError("'%s' object has no attribute '%s'" % (self._class['name'], msg['name']))
+                ret = AttributeError("'%s' object has no attribute '%s'" % (classData['name'], msg['name']))
             else:
                 try:
                     func = getattr(classInstance, msg['name'])
-                    ret = func(*msg.get('args', ()), **msg.get('kwargs', {}))
+                    if isinstance(type(func), property):
+                        ret = func
+                    elif callable(func):
+                        ret = func(*msg.get('args', ()), **msg.get('kwargs', {}))
+                    else:
+                        ret = func
                 except Exception as e:
                     print >> sys.stderr, "%s\n%s" % (e, traceback.format_exc())
                     ret = e
-            self._recvPipe.send(ret)
+            recvPipe.send(ret)
             
     def _send(self, msg):
-        self._pipeLock.acquire()
+        lock = object.__getattribute__(self, '_pipeLock')
+        lock.acquire()
         try:
-            self._sendPipe.send(msg)
+            object.__getattribute__(self, '_sendPipe').send(msg)
             try:
-                ret = self._sendPipe.recv()
+                ret = object.__getattribute__(self, '_sendPipe').recv()
             except EOFError:
                 return None
             
@@ -101,4 +129,5 @@ class SubProcessWrapper(Process):
         except KeyboardInterrupt:
             return
         finally:
-            self._pipeLock.release()
+            lock.release()
+
