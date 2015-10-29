@@ -25,13 +25,18 @@ dataHelper.prototype = {
 		return responses;
 	},
 
-	pollResponses : function(callback, root, lastId) {
+	pollResponses : function(callback, root) {
 		var self = this;
-		var data = self.getResponses();
-		var id = callback(root, lastId, data);
-		setTimeout(function() {
-			self.pollResponses(callback, root, id);
-		}, 2000);
+		var id = -1;
+		setInterval(function() {
+			try {
+				var data = self.getResponses();
+				if (data !== null) {
+					id = callback(root, id, data);
+				}
+			} catch (e) {
+			}
+		}, 500);
 	},
 }
 
@@ -41,7 +46,7 @@ function uiHelper() {
 uiHelper.prototype = {
 	load : function() {
 		var dao = new dataHelper();
-		dao.pollResponses(this.fill.bind(this), '#questions', -1);
+		dao.pollResponses(this.fill.bind(this), '#questions');
 	},
 
 	fill : function(root, lastId, data) {

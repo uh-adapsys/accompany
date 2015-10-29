@@ -1305,7 +1305,7 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
                             {
                                 pos.at(0) = locationQuery.value(0).toDouble();
                                 pos.at(1) = locationQuery.value(1).toDouble();
-                                pos.at(2) = locationQuery.value(1).toDouble()/ 180.0 * 3.142;
+                                pos.at(2) = locationQuery.value(2).toDouble()/ 180.0 * 3.142;
                             }
                         }
                         else
