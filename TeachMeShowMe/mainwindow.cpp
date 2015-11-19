@@ -2098,7 +2098,7 @@ void MainWindow::on_finalRememberPushButton_clicked()
            if (command == "DoorbellRang")  // within last 10 seconds
            {
                ruletext = cmd;
-               actionText  = "SELECT * FROM Sensors WHERE sensorId = 59 AND lastActiveValue > 0 and lastUpdate+INTERVAL 10 SECOND >= NOW()";
+               actionText  = "SELECT * FROM Sensors WHERE sensorId = 59 AND lastActiveValue > 0 and lastUpdate+INTERVAL 10 SECOND >= fnGetSchedulerDateTime()";
            }
 
            generateForWithinSQL(command, "bathTapsOn", "SELECT * FROM Sensors WHERE (sensorId = 11 or sensorId = 12) AND status = 'On'",actionText);
@@ -2273,7 +2273,7 @@ void MainWindow::on_finalRememberPushButton_clicked()
 
     // add the rule cehcking the condition
 
-    addActionRulesRow(sequenceName,"Auto:" + sId + sequenceName + " is true", "SELECT * FROM Sensors WHERE sensorId = " + sId + " AND value = 'true'" ,ruleCount,"R");
+    addActionRulesRow(sequenceName,"Auto:" + sId + sequenceName + " is True", "SELECT * FROM Sensors WHERE sensorId = " + sId + " AND value = 'True'" ,ruleCount,"R");
 
     ruleCount++;
 
@@ -2287,7 +2287,7 @@ void MainWindow::on_finalRememberPushButton_clicked()
     if (ui->alwaysCheckBox->isChecked())   // this implies that user turned off the reminder bit
     {
         // we reset at midnight
-        addActionRulesRow("reset-" + sequenceName,sId + sequenceName + " is false", "SELECT * FROM Sensors WHERE sensorId = " + sId + " AND value = 'false'",0,"R");
+        addActionRulesRow("reset-" + sequenceName,sId + sequenceName + " is False", "SELECT * FROM Sensors WHERE sensorId = " + sId + " AND value = 'False'",0,"R");
         addActionRulesRow("reset-" + sequenceName,sId + sequenceName + " And it is between 1am and 2am", "CALL spBetweenTimeCheck('01:00:00','02:00:00') " ,1,"R");
      }
     else
@@ -2295,12 +2295,12 @@ void MainWindow::on_finalRememberPushButton_clicked()
        reset.setNum(globalReset);
        qDebug()<<"Reset: "<< reset;
        addActionRulesRow("reset-" + sequenceName,sId + sequenceName + " is false and has been for " + reset + " seconds", \
-                                   "SELECT * FROM Sensors WHERE sensorId = " + sId + " AND value = 'false' and lastUpdate+INTERVAL " + reset + " SECOND <= NOW()" ,0,"R");
+                                   "SELECT * FROM Sensors WHERE sensorId = " + sId + " AND value = 'False' and lastUpdate+INTERVAL " + reset + " SECOND <= fnGetSchedulerDateTime()" ,0,"R");
     }
 
 
 
-    addActionRulesRow("reset-" + sequenceName,"SET ::" + sId + "::" + sequenceName + " TO true", "cond,0," + sId + ",true" ,2,"A");
+    addActionRulesRow("reset-" + sequenceName,"SET ::" + sId + "::" + sequenceName + " TO True", "cond,0," + sId + ",True" ,2,"A");
 
     addSequenceRow   ("reset-" + sequenceName, "Reset condition " + sequenceName, 1, 80, 1);
 
@@ -2381,7 +2381,7 @@ void MainWindow::on_finalRememberPushButton_clicked()
 
     // turn the reset condition off
 
-    addActionRulesRow(sequenceName,"Auto: SET ::" + sId + "::" + sequenceName + " TO false", "cond,0," + sId + ",false" ,ruleCount,"A");
+    addActionRulesRow(sequenceName,"Auto: SET ::" + sId + "::" + sequenceName + " TO False", "cond,0," + sId + ",False" ,ruleCount,"A");
 
     ruleCount++;
 
@@ -2430,7 +2430,7 @@ QString MainWindow::createResetCondition(QString seq)
 
    //    qDebug()<<sId<<" "<<seq;
 
-       query.prepare("INSERT INTO Sensors VALUES (:sensorId, 'true', '0', :name, '5', 'Predicate', 'N/A', '6',NOW(),NOW(),0,'false','false',0,0,0,0)");
+       query.prepare("INSERT INTO Sensors VALUES (:sensorId, 'True', '0', :name, '5', 'Predicate', 'N/A', '6',fnGetSchedulerDateTime(),fnGetSchedulerDateTime(),0,'False','False',0,0,0,0)");
 
        query.bindValue(":sensorId",sId);
        query.bindValue(":name",seq);
@@ -2834,7 +2834,7 @@ void MainWindow::generateForWithinSQL(QString command, QString cmd, QString sql,
     {
       actionText = sql;
       QString mins = command.section(":",1,1);
-      actionText += " and lastUpdate+INTERVAL " + mins + " MINUTE <= NOW()";
+      actionText += " and lastUpdate+INTERVAL " + mins + " MINUTE <= fnGetSchedulerDateTime()";
     }
     else
     {
@@ -2842,7 +2842,7 @@ void MainWindow::generateForWithinSQL(QString command, QString cmd, QString sql,
       {
         actionText = sql;
         QString mins = command.section(":",1,1);
-        actionText += " and lastUpdate+INTERVAL " + mins + " MINUTE >= NOW()";
+        actionText += " and lastUpdate+INTERVAL " + mins + " MINUTE >= fnGetSchedulerDateTime()";
       }
       else
       {
