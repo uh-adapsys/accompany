@@ -3144,7 +3144,7 @@ void MainWindow::fillRuleActionTable(QString name, int Id, QString type, bool ch
 
           v1.setNum(ui->lastActiveSpinBox->value());
           ruletext += " AND was in this state within the last " + v1 + " seconds";
-          rule+=" and lastUpdate+INTERVAL " + v1 + " SECOND >= NOW()";
+          rule+=" and lastUpdate+INTERVAL " + v1 + " SECOND >= fnGetSchedulerDateTime()";
       }
       else
       {
@@ -3205,7 +3205,7 @@ void MainWindow::fillRuleActionTable(QString name, int Id, QString type, bool ch
              QString v1;
              v1.setNum(ui->sensorActiveSpinBox->value());
              ruletext += " AND has been in this state for more than " + v1 + " seconds";
-             rule+=" and lastUpdate+INTERVAL " + v1 + " SECOND <= NOW()";
+             rule+=" and lastUpdate+INTERVAL " + v1 + " SECOND <= fnGetSchedulerDateTime()";
           }
       }
 
@@ -4583,7 +4583,7 @@ void MainWindow::on_condAddRuleButton_clicked()
 
         qDebug() << sId;
 
-        query.prepare("INSERT INTO Sensors VALUES (:sensorId, '0', '0', :name, '5', 'Predicate', 'N/A', '6',NOW(),NOW(),0,'false','false',NULL,NULL,NULL,NULL)");
+        query.prepare("INSERT INTO Sensors VALUES (:sensorId, '0', '0', :name, '5', 'Predicate', 'N/A', '6',fnGetSchedulerDateTime(),fnGetSchedulerDateTime(),0,'false','false',NULL,NULL,NULL,NULL)");
 
        query.bindValue(":sensorId",sId);
        query.bindValue(":name",ui->condLineEdit->text());
