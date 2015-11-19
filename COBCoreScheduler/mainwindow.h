@@ -71,6 +71,8 @@ private slots:
 	void on_GUIradioButton3_clicked();
 	void on_GUIradioButton4_clicked();
     void on_speedSpinBox_valueChanged(int arg1);
+
+    void on_killPushButton_clicked();
 };
 
 #endif // MAINWINDOW_H

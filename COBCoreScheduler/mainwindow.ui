@@ -48,23 +48,10 @@
      <enum>QAbstractItemView::ScrollPerPixel</enum>
     </property>
    </widget>
-   <widget class="QPushButton" name="evaluatePushButton">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>102</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Evaluate One</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="evaluateAllPushButton">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>20</x>
       <y>20</y>
       <width>102</width>
       <height>24</height>
@@ -109,7 +96,7 @@
    <widget class="QPushButton" name="executePushButton">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>140</x>
       <y>20</y>
       <width>102</width>
       <height>24</height>
@@ -255,8 +242,8 @@
    <widget class="QPushButton" name="testPlannerPushButton">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>670</y>
+      <x>330</x>
+      <y>650</y>
       <width>102</width>
       <height>24</height>
      </rect>
@@ -268,7 +255,7 @@
    <widget class="QPushButton" name="enableDebugPushButton">
     <property name="geometry">
      <rect>
-      <x>550</x>
+      <x>330</x>
       <y>670</y>
       <width>131</width>
       <height>24</height>
@@ -420,6 +407,19 @@
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="killPushButton">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>660</y>
+      <width>231</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Kill Currently Executing Behaviour</string>
     </property>
    </widget>
   </widget>

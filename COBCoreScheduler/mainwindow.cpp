@@ -139,9 +139,9 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
     opterr = 0;
     int c;
     rc=0;
-    loopSpeed = 300;
+    loopSpeed = 500;
 
-    ui->speedSpinBox->setValue(300);
+    ui->speedSpinBox->setValue(500);
 
     while ((c = getopt(argc, argv, "rl:")) != -1)
         switch (c)
@@ -298,7 +298,7 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
         scenario = item;
 
     ui->sceanrioLabel->setText(scenario);
-    ui->evaluatePushButton->setEnabled(false);
+
     ui->evaluateAllPushButton->setEnabled(true);
     ui->executePushButton->setEnabled(false);
     ui->stopSchedulerPushButton->setEnabled(false);
@@ -428,7 +428,7 @@ bool MainWindow::fillSequenceTable(QString scenario)
             "SELECT name, priority, IF(interruptable,'Yes','No')FROM Sequences WHERE schedulable = 1 and experimentalLocationId = "\
                 + houseLocation + " AND (scenario = 'User Generated' OR scenario = 'Operator' OR scenario = '"\
                 + scenario + "') ORDER BY schedulable DESC, priority DESC, RAND()";
-        qDebug()<<qry;
+ //       qDebug()<<qry;
         if (!query.exec(qry))
         {
             QMessageBox msgBox;
@@ -605,7 +605,7 @@ void MainWindow::on_sequenceTableWidget_cellClicked(int row, int column)
 
     if (ui->startSchedulerPushButton->isEnabled())
     {
-        ui->evaluatePushButton->setEnabled(true);
+  //      ui->evaluatePushButton->setEnabled(true);
         ui->executePushButton->setEnabled(true);
         on_evaluatePushButton_clicked();
     }
@@ -613,13 +613,13 @@ void MainWindow::on_sequenceTableWidget_cellClicked(int row, int column)
     {
         if (ui->showNonSchedcheckBox->isChecked())
         {
-            ui->evaluatePushButton->setEnabled(true);
+    //        ui->evaluatePushButton->setEnabled(true);
             ui->executePushButton->setEnabled(true);
             on_evaluatePushButton_clicked();
         }
         else
         {
-          ui->evaluatePushButton->setEnabled(false);
+     //     ui->evaluatePushButton->setEnabled(false);
           ui->executePushButton->setEnabled(false);
         }
     }
@@ -629,7 +629,7 @@ void MainWindow::on_sequenceTableWidget_cellClicked(int row, int column)
 
 void MainWindow::on_evaluateAllPushButton_clicked()
 {
-    ui->evaluatePushButton->setEnabled(false);
+  //  ui->evaluatePushButton->setEnabled(false);
     ui->executePushButton->setEnabled(false);
 
     int noRows = ui->sequenceTableWidget->rowCount();
@@ -955,13 +955,21 @@ void MainWindow::on_executePushButton_clicked()
 
 
 
-    QString sequenceName = ui->sequenceTableWidget->item(ui->sequenceTableWidget->currentRow(), 0)->text();
+    QString sequenceName  = ui->sequenceTableWidget->item(ui->sequenceTableWidget->currentRow(), 0)->text();
+    int priority          = ui->sequenceTableWidget->item(ui->sequenceTableWidget->currentRow(), 1)->text().toInt();
+    QString interruptable = ui->sequenceTableWidget->item(ui->sequenceTableWidget->currentRow(), 2)->text();
 
     executionResult = 0;
 
     if (evaluateRules(sequenceName, false))
     {
-         runSequence(sequenceName, 0, "No", ui->sequenceTableWidget->currentRow());
+
+        if (currentlyExecutingCanInterrupt == "Yes" && currentlyExecutingSequence != "" && priority > currentlyExecutingPriority)
+        {
+                on_killPushButton_clicked();
+        }
+
+        runSequence(sequenceName, priority ,interruptable , ui->sequenceTableWidget->currentRow());
     }
     else
     {
@@ -1519,8 +1527,21 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
         {
             QSqlQuery Goalquery(db6);
             Goalquery.clear();
+            Goalquery.exec("select fnGetSchedulerDateTime()");
+
+            QDateTime now;
+
+            while (Goalquery.next())
+            {
+                now = Goalquery.value(0).toDateTime();
+                qDebug()<<now.toString("yyyy-MM-dd hh:mm:ss");
+            }
+
+
+            Goalquery.clear();
             Goalquery.prepare(
-                "INSERT INTO SensorLog (timestamp,sensorId,room,channel,value,status) VALUES (NOW(),:goalId,'','',:value,:truefalse)");
+                "INSERT INTO SensorLog (timestamp,sensorId,room,channel,value,status) VALUES (:now,:goalId,'','',:value,:truefalse)");
+            Goalquery.bindValue(":now", now.toString("yyyy-MM-dd hh:mm:ss"));
             Goalquery.bindValue(":value", pname1);
             Goalquery.bindValue(":goalId", pname);
 
@@ -1661,7 +1682,7 @@ void MainWindow::on_startSchedulerPushButton_clicked()
     ui->startSchedulerPushButton->setEnabled(false);
     ui->stopSchedulerPushButton->setEnabled(true);
     ui->evaluateAllPushButton->setEnabled(false);
-    ui->evaluatePushButton->setEnabled(false);
+ //   ui->evaluatePushButton->setEnabled(false);
     ui->executePushButton->setEnabled(false);
 }
 
@@ -1831,17 +1852,21 @@ void MainWindow::stopSequence(QString sequenceName)
         robot->stop();
     }
     qDebug() << "Stopping sequence thread";
-    if (!sched->wait(5000))
-    {
+//    if (!sched->wait(5000))
+//    {
 // Fallback to terminating the thread, but we're going to have to rebuild the robot class too,
 // since it's been left in an indeterminite state
-        qDebug() << " !!!*** Thread did not close in time, terminating, scheduler may be in an unstable state ***!!!";
+//        qDebug() << " !!!*** Thread did not close in time, terminating, scheduler may be in an unstable state ***!!!";
         sched->terminate();
-    }
-    else
-    {
-        qDebug() << "Thread cleanly stopped.";
-    }
+        while (!sched->wait(1000))
+        {
+            qDebug()<<"Waiting for temination!!";
+        }
+ //   }
+ //   else
+ //   {
+ //       qDebug() << "Thread cleanly stopped.";
+ //   }
 
     currentlyExecutingSequence = "";
 
@@ -1850,6 +1875,7 @@ void MainWindow::stopSequence(QString sequenceName)
 
 void MainWindow::runSequence(QString sequenceName, int priority, QString CanInterrupt, int row)
 {
+            qDebug()<<"Run Sequence:::"<<sequenceName;
     logMessage("Executing: " + sequenceName);
 //*   ui->sequenceTableWidget->item(row, 1)->setBackgroundColor(Qt::cyan);
 
@@ -2321,4 +2347,13 @@ void MainWindow::planNavigation(QString destination)
 void MainWindow::on_speedSpinBox_valueChanged(int arg1)
 {
     loopSpeed = arg1;
+}
+
+
+
+void MainWindow::on_killPushButton_clicked()
+{
+    qDebug()<<"Stopping: " << currentlyExecutingSequence;
+
+    stopSequence(currentlyExecutingSequence);
 }
