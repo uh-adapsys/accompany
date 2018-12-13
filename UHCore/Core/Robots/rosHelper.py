@@ -258,7 +258,7 @@ class ROS(object):
     @staticmethod
     def _parseBashEnviron(preCommand=''):
         """ Execute a bash command and export the env to a dictionary """
-        command = ['bash', '-c', ('%s; env' % preCommand).strip('; ')]
+        command = ['bash', '-c', ('%s; env -i' % preCommand).strip('; ')]
         pipe = Popen(command, stdout=PIPE)
         data = pipe.communicate()[0]
         env = dict((line.split("=", 1) for line in data.splitlines()))

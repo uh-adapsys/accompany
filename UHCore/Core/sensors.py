@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import base64
 import json
+import pprint
 import sys
+import time
 import urllib2
 
 from socket import AF_INET, SOCK_DGRAM, socket, timeout
@@ -56,11 +58,12 @@ class ZWaveHomeController(PollingProcessor):
     def __init__(self, ipAddress):
         super(ZWaveHomeController, self).__init__()
 
-        self._baseUrl = "http://%(ip)s:80/api/devices" % {'ip': ipAddress}
+        self._baseUrl = "http://%(ip)s:80/api" % {'ip': ipAddress}
 
         # Place for the callback methods to store "static" values.
         # Currently only needed for the Moving Average Filter for the MCP9700
         # temperature sensor temperature calculations.
+        self._last_event_id = 0
         self._handler_memory = {}
         self._channels = {}
         self._sr = StateResolver()
@@ -68,6 +71,7 @@ class ZWaveHomeController(PollingProcessor):
         self._sensors = self._sensorDao.findSensors()
         self._warned = []
         self._connected = []
+        self._pp = pprint.PrettyPrinter(indent=2)
 
     @property
     def channels(self):
@@ -88,9 +92,9 @@ class ZWaveHomeController(PollingProcessor):
         """ Check the http api for sensors & values and add them to the channels list in the standard format """
         try:
             # http://192.168.1.109/devices
-            url = self._baseUrl
+            url = self._baseUrl + "/devices"
             request = urllib2.Request(url)
-            base64string = base64.encodestring('%s:%s' % ('admin', 'admin')).replace('\n', '')
+            base64string = base64.encodestring('%s:%s' % ('<user>', '<pw>')).replace('\n', '')
             request.add_header("Authorization", "Basic %s" % base64string)
             result = urllib2.urlopen(request)
             data = json.load(result)
@@ -99,7 +103,81 @@ class ZWaveHomeController(PollingProcessor):
                 print >> sys.stderr, "Error while receiving data from ZWaveHomeController: %s" % e
                 self._warned.append(str(type(e)))
             return
+        
+        try:
+            # http://192.168.1.109/devices
+                    
+            #ts = int(round(time.time() * 1000)) - 20000000
+            
+            ts = int(time.time()) - 1000
+            url = self._baseUrl +  "/panels/event?from=%(ts)s" % {'ts': ts}
+            request = urllib2.Request(url)
+            base64string = base64.encodestring('%s:%s' % ('uh.robothouse@gmail.com', '#Wa!P4817uh')).replace('\n', '')
+            request.add_header("Authorization", "Basic %s" % base64string)
+            result = urllib2.urlopen(request)
+            events = json.load(result)
+        except Exception as e:
+            if str(type(e)) not in self._warned:
+                print >> sys.stderr, "Error while receiving data from ZWaveHomeController: %s" % e
+                self._warned.append(str(type(e)))
+            return
+        
+        #for event in events:
+            #if event['id'] > self._last_event_id:
+                #self._last_event_id = event['id']
+                
+                
+                ##print(event['timestamp'])
+                ##print(int(time.time()))
+                
+                #channelDescriptor = 'zwave:' + str(event['deviceID'])
+                #try:
+                    #sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == channelDescriptor)
+                #except StopIteration:
+                    ## Only warn once, or we'll flood the console
+                    #if channelDescriptor not in self._warned:
+                        #dev = 'Unknown device'
+                        #for device in data:
+                            #if device['id'] is event['deviceID']:
+                                #dev = device['name']
+                        #print "Warning: Unable to locate sensor record for ZWave sensor ID: %s (%s)" % (str(channelDescriptor), dev)
+                        #self._warned.append(channelDescriptor)
+                    #continue
+                
+                ##self._pp.pprint(event)
 
+                #if sensor['ChannelDescriptor'] not in self._connected:
+                    #print "Connected to %s sensor %s on %s" % (self.__class__.__name__, sensor['name'], sensor['ChannelDescriptor'])
+                    #self._connected.append(sensor['ChannelDescriptor'])
+
+                #_device = sensor['locationName']
+                #_pin = sensor['name']
+                #_id = sensor['sensorId']
+                #_rule = sensor['sensorRule']
+
+                ## order determines priority
+                #valueKeys = ['newValue']
+
+                #_value = None
+                #for valueKey in valueKeys:
+                    #if valueKey in event:
+                        #_value = event[valueKey]
+                        #break
+                    
+                #_value = str(_valueHelper.filterValue(_value, sensor['sensorTypeName']))
+                #if _value is not None:
+                    #_type = sensor['sensorTypeName']
+                    #_uuid = channelDescriptor
+                    #_status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id, 'sensorRule': _rule})
+
+                    #self._channels[_uuid] = {
+                        #'id': _id,
+                        #'room': _device,
+                        #'channel': _pin,
+                        #'value': _value,
+                        #'status': _status
+                    #}
+        
         for device in data:
             channelDescriptor = 'zwave:' + str(device['id'])
             try:
@@ -107,7 +185,7 @@ class ZWaveHomeController(PollingProcessor):
             except StopIteration:
                 # Only warn once, or we'll flood the console
                 if channelDescriptor not in self._warned:
-                    print "Warning: Unable to locate sensor record for ZWave sensor ID: %s (%s)" % (str(channelDescriptor), str(device['name']))
+                    #print "Warning: Unable to locate sensor record for ZWave sensor ID: %s (%s)" % (str(channelDescriptor), str(device['name']))
                     self._warned.append(channelDescriptor)
                 continue
 

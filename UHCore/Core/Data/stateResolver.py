@@ -13,6 +13,8 @@ class StateResolver(object):
         self._warned = {}
 
     def isSensorOn(self, sensor):
+        
+        #print(sensor)d
         """ Evaluate a sensors rules into a boolean value """
         rule = sensor['sensorRule']
         value = sensor['value']
@@ -23,6 +25,10 @@ class StateResolver(object):
         elif rule == '!Boolean':
             return not self.evaluateBoolean(sensor['sensorTypeName'], value)
         elif rule.find('Watts') > -1:
+            return self.evaluateRule(rule, value)
+        elif rule.find('Lux') > -1:
+            return self.evaluateRule(rule, value)
+        elif rule.find('Degrees') > -1:
             return self.evaluateRule(rule, value)
         elif rule == 'N/A':
             return None
@@ -37,6 +43,8 @@ class StateResolver(object):
         return value > 1
 
     def evaluateBoolean(self, sensorType, value):
+        #print(sensorType)
+        #print(value)
         """ Evaluation for boolean sensor types (REED, PRESSUREMAP, SWITCH) """
         if sensorType == 'CONTACT_REED':
             return float(value) >= 0.5
@@ -44,6 +52,16 @@ class StateResolver(object):
             return float(value) < 0.5
         elif sensorType == 'LEVEL_SENSOR_SWITCH':
             return float(value) > 0.5
+        elif sensorType == 'ZWAVE_TKBHOME_PLUG':
+            return str(value).lower() == 'true'
+        elif sensorType == 'ZWAVE_MOTION':
+            return str(value).lower() == 'true'
+        elif sensorType == 'ZWAVE_ACCELEROMETER':
+            value_dict = eval(value)
+            for v in value_dict.itervalues():
+                if v > 0:
+                    return True
+            return False
         else:
             if not self._warned.has_key(sensorType):
                 print "Unknown boolean sensorType: %s, defaulting to 0 == False all else True" % sensorType
@@ -61,6 +79,8 @@ class StateResolver(object):
                 pyRule = rule.replace('&&', 'and').replace('||', 'or')
                 # Watts = float(value)
                 pyRule = pyRule.replace('Watts', str(value))
+                pyRule = pyRule.replace('Lux', str(value))
+                pyRule = pyRule.replace('Degrees', str(value))
                 return eval(pyRule)
             else:
                 return None
