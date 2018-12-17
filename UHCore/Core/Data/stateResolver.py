@@ -56,6 +56,8 @@ class StateResolver(object):
             return str(value).lower() == 'true'
         elif sensorType == 'ZWAVE_MOTION':
             return str(value).lower() == 'true'
+        elif sensorType == 'ZWAVE_CONTACT':
+          return str(value).lower() == 'true'
         elif sensorType == 'ZWAVE_ACCELEROMETER':
             value_dict = eval(value)
             for v in value_dict.itervalues():
