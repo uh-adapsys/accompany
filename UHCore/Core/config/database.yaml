@@ -1,10 +1,10 @@
 # Database configurations
 # The settings for the channel logging MySQL server / database / table
-#mysql_log_server: localhost
-mysql_log_server: 10.0.1.53
-#mysql_log_db: LiverpoolTestDB
+mysql_log_server: localhost
+#mysql_log_server: 10.0.1.56 (53)
+mysql_log_db: LiverpoolTestDB
 #mysql_log_db: RobotHouseDemoDB
-mysql_log_db: AccompanyResources
+#mysql_log_db: AccompanyResources
 mysql_log_user: rhUser
 mysql_log_password: waterloo
 
