@@ -8,6 +8,8 @@ UH Robot House:
     geo_password: r0b0th0use##
     geo_db: livewiredb
     geo_query: CALL expPower
+  - type: ZWaveHomeController
+    zwave_ip: 10.0.1.113
   #- type: ZigBeeDirect
   #  usb_port: /dev/ttyUSB0
   map:
