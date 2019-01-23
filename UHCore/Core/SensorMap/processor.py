@@ -103,9 +103,13 @@ class MapProcessor(object):
 
         root = self.mapBase.getroot()
         mapHeight = float(root.attrib['height'])
+        mapWidth = float(root.attrib['width'])
+        print("MAP SIZE: " + str(mapHeight) + " x " + str(mapWidth))
         cc = CoordinateConvertor(self._map)
-
+        
+        i = 0
         for element in elements:
+            i = i + 1
             try:
                 if element['on'] is None:
                     state = False
@@ -113,25 +117,44 @@ class MapProcessor(object):
                     state = element['on']
             except:
                 state = False
-            (x, y, d) = cc.toScaled((element['xCoord'], element['yCoord'], element['orientation']))
-            (img, height, width) = self.getIcon(element['icon'], element['name'], state)
+            
+            #if "door" in str(element['name']) or "drawer" in str(element['name']):
+            if True:
+                print(element['name'] + ": " + str(element['xCoord']) + " / " + str(element['yCoord']))
+                (x, y, d) = cc.toScaled((element['xCoord'], element['yCoord'], element['orientation']))
+                (img, height, width) = self.getIcon(element['icon'], element['name'], state)
 
-            # svg y is from bottom corner
-            My = mapHeight - y
-            # be sure to translate first, which changes the local coordinate space to the group object
-            # which is important for the rotation about the center
-            transform = "translate(%(x)s, %(y)s) rotate(%(rotate)s, %(xCenter)s, %(yCenter)s)" % {
-                'x': x,
-                'y': My,
-                'rotate': d,
-                'xCenter': 0,
-                'yCenter': 0
-            }
+                # svg y is from bottom corner
+                My = mapHeight - y
+                # be sure to translate first, which changes the local coordinate space to the group object
+                # which is important for the rotation about the center
+                transform = "translate(%(x)s, %(y)s) rotate(%(rotate)s, %(xCenter)s, %(yCenter)s) scale(%(scale)s)" % {
+                    'x': x,
+                    'y': My,
+                    'rotate': d,
+                    'xCenter': 0,
+                    'yCenter': 0,
+                    'scale': .35
+                }
 
-            img.attrib['transform'] = transform
-            img.attrib['id'] = str(element['id'])
-            img.attrib['name'] = str(element['name'])
-            root.append(img)
+                img.attrib['transform'] = transform
+                img.attrib['id'] = str(element['id'])
+                img.attrib['name'] = str(element['name'])
+                
+                #xp = "%"
+                #yp = str(float(i/10)) +"%"
+                #yp= "0%"
+                #if i % 2 == 0:
+                    #xp = "-2" + xp
+                #else:
+                    #xp = "2" + xp
+                #b = et.SubElement(img, 'text')
+                #b.attrib['x'] = xp
+                #b.attrib['y'] = yp
+                #b.attrib['font-size'] = "6"
+                #b.text = element['name']
+                
+                root.append(img)
 
         # ElementTree.write() doesn't write the headers
         f = io.BytesIO()
