@@ -14,12 +14,17 @@ UH Robot House:
   #  usb_port: /dev/ttyUSB0
   map:
     base: RobotHouseMap.svg
-    svg_scale: 100.0
-    svg_offset: 
-      x: 402.5
-      y: 999.75
-    svg_rotation: 90
+    svg_scale: 27.0
+    svg_offset:
+      x: 110
+      y: 1240
+    svg_rotation: 0
     pgm_scale: 0.05
     pgm_offset:
       x: -8
       y: -19.2
+
+    #svg_scale: 28
+    #svg_offset:
+      #x: 120
+      #y: 1230
