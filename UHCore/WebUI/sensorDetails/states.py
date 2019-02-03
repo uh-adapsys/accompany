@@ -25,7 +25,10 @@ class States(object):
                              'room': '%(loc)s: %(sen)s' % { 'loc': sensor['locationName'], 'sen': sensor['name'] },
                              'channel': sensor['ChannelDescriptor'],
                              'value': sensor['value'],
-                             'status': self._sr.getDisplayState(sensor)
+                             'status': self._sr.getDisplayState(sensor),
+                             'x': sensor['xCoord'],
+                             'y': sensor['yCoord'],
+                             'name': sensor['name']
                              })
         
         cherrypy.response.headers['Content-Type'] = 'application/json'
@@ -35,6 +38,26 @@ class States(object):
         stype = sensor['sensorTypeName']
         if stype == 'CONTACT_REED':
             if float(sensor['value']) == 1:
+                return '#FF0000'
+            else:
+                return '#00FF00' # closed door == green colour
+        elif stype == 'ZWAVE_CONTACT':
+            if sensor['status'] == "Open":
+                return '#FF0000'
+            else:
+                return '#00FF00' # closed door == green colour
+        elif stype == 'ZWAVE_LIGHT':
+            if sensor['status'] == "Off":
+                return '#FF0000'
+            else:
+                return '#00FF00'
+        elif stype == 'ZWAVE_MOTION':
+            if sensor['status'] == "Absent":
+                return '#FF0000'
+            else:
+                return '#00FF00' # closed door == green colour
+        elif stype == 'ZWAVE_TEMPERATURE':
+            if sensor['status'] == "Inconvenient":
                 return '#FF0000'
             else:
                 return '#00FF00' # closed door == green colour
@@ -61,4 +84,7 @@ class States(object):
             else:
                 return '#00FF00' # closed door == green colour
         else:
-            return 'None'
+            if self._sr.isSensorOn(sensor):
+                  return '#FF0000'
+            else:
+                return '#00FF00'
