@@ -30,6 +30,8 @@ class StateResolver(object):
             return self.evaluateRule(rule, value)
         elif rule.find('Degrees') > -1:
             return self.evaluateRule(rule, value)
+        elif rule.find('Percentage') > -1:
+            return self.evaluateRule(rule, value)
         elif rule == 'N/A':
             return None
         elif rule == 'Level':
@@ -83,6 +85,7 @@ class StateResolver(object):
                 pyRule = pyRule.replace('Watts', str(value))
                 pyRule = pyRule.replace('Lux', str(value))
                 pyRule = pyRule.replace('Degrees', str(value))
+                pyRule = pyRule.replace('Percentage', str(value))
                 return eval(pyRule)
             else:
                 return None
