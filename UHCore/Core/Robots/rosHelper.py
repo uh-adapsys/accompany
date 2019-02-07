@@ -261,7 +261,16 @@ class ROS(object):
         command = ['bash', '-c', ('%s; env -i' % preCommand).strip('; ')]
         pipe = Popen(command, stdout=PIPE)
         data = pipe.communicate()[0]
-        env = dict((line.split("=", 1) for line in data.splitlines()))
+        env = {}
+        for line in data.splitlines():
+            try:
+                key, value = line.split("=", 1)
+                env[key] = value
+            except ValueError:
+                # TODO: This happens when an environment value has a newline in it
+                #  should fine a proper way to handle it in the future
+                continue
+        #env = dict((line.split("=", 1) for line in data.splitlines()))
         return env
 
     @staticmethod
@@ -422,7 +431,7 @@ class Transform(object):
             toTopic = self._defaultTo
 
         """
-        Waits for the /fromTopic to /toTopic transform to be availalble and 
+        Waits for the /fromTopic to /toTopic transform to be availalble and
         returns two tuples: (x, y, z) and a quaternion ( rx, ry, rz, rxy)
         Note: z values are 0 for 2D mapping and navigation.
         """
@@ -456,7 +465,7 @@ class Transform(object):
             toTopic = self._defaultTo
 
         """
-        Waits for the /fromTopic to /toTopic transform to be availalble and 
+        Waits for the /fromTopic to /toTopic transform to be availalble and
         returns two tuples: (x, y, z) and a quaternion ( rx, ry, rz, rxy)
         Note: z values are 0 for 2D mapping and navigation.
         """
